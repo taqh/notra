@@ -1,6 +1,11 @@
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth/minimal";
-import { organization } from "better-auth/plugins";
+import { nextCookies } from "better-auth/next-js";
+import {
+  haveIBeenPwned,
+  lastLoginMethod,
+  organization,
+} from "better-auth/plugins";
 import { db } from "@/lib/db/drizzle";
 import { redis } from "@/lib/redis";
 
@@ -12,7 +17,7 @@ export const auth = betterAuth({
   experimental: {
     joins: true,
   },
-  plugins: [organization()],
+  plugins: [organization(), lastLoginMethod(), haveIBeenPwned(), nextCookies()], // nextCookies() must be last
   secondaryStorage: {
     get: async (key) => await redis.get(key),
     set: async (key, value, ttl) => {
