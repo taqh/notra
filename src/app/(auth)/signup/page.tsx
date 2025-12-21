@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { GithubDark } from "@/components/ui/svgs/githubDark";
+import { Github } from "@/components/ui/svgs/github";
 import { Google } from "@/components/ui/svgs/google";
 import { handleSocialAuth } from "@/lib/auth/functions";
 
@@ -83,7 +83,7 @@ export default function SignUp() {
             type="button"
             variant="outline"
           >
-            <GithubDark className="mr-2 size-4" />
+            <Github className="mr-2 size-4" />
             GitHub
           </Button>
         </div>

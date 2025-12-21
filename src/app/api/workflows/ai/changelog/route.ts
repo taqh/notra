@@ -3,14 +3,20 @@ import { githubChangelogAgent } from "@/lib/agents/changelog";
 
 export async function POST(request: Request) {
   try {
-    const { prompt } = await request.json();
+    const body = await request.json();
+    const validationResult = generateChangelogBodySchema.safeParse(body);
 
-    if (!prompt) {
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Prompt is required" },
+        {
+          error: "Validation failed",
+          details: validationResult.error.issues,
+        },
         { status: 400 }
       );
     }
+
+    const { prompt } = validationResult.data;
 
     const result = githubChangelogAgent.stream({
       prompt,

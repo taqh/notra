@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -135,11 +136,81 @@ export const invitations = pgTable(
   ]
 );
 
+export const integrations = pgTable(
+  "integrations",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    createdByUserId: text("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    encryptedToken: text("encrypted_token"),
+    displayName: text("display_name").notNull(),
+    enabled: boolean("enabled").default(true).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("integrations_organizationId_idx").on(table.organizationId),
+    index("integrations_createdByUserId_idx").on(table.createdByUserId),
+  ]
+);
+
+export const integrationRepositories = pgTable(
+  "integration_repositories",
+  {
+    id: text("id").primaryKey(),
+    integrationId: text("integration_id")
+      .notNull()
+      .references(() => integrations.id, { onDelete: "cascade" }),
+    owner: text("owner").notNull(),
+    repo: text("repo").notNull(),
+    enabled: boolean("enabled").default(true).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("integrationRepositories_integrationId_idx").on(table.integrationId),
+    uniqueIndex("integrationRepositories_integration_owner_repo_uidx").on(
+      table.integrationId,
+      table.owner,
+      table.repo
+    ),
+  ]
+);
+
+export const repositoryOutputs = pgTable(
+  "repository_outputs",
+  {
+    id: text("id").primaryKey(),
+    repositoryId: text("repository_id")
+      .notNull()
+      .references(() => integrationRepositories.id, { onDelete: "cascade" }),
+    outputType: text("output_type").notNull(),
+    enabled: boolean("enabled").default(true).notNull(),
+    config: jsonb("config"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("repositoryOutputs_repositoryId_idx").on(table.repositoryId),
+    uniqueIndex("repositoryOutputs_repository_outputType_uidx").on(
+      table.repositoryId,
+      table.outputType
+    ),
+  ]
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
   members: many(members),
   invitations: many(invitations),
+  integrations: many(integrations),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -159,6 +230,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   members: many(members),
   invitations: many(invitations),
+  integrations: many(integrations),
 }));
 
 export const membersRelations = relations(members, ({ one }) => ({
@@ -182,3 +254,39 @@ export const invitationsRelations = relations(invitations, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const integrationsRelations = relations(
+  integrations,
+  ({ one, many }) => ({
+    organization: one(organizations, {
+      fields: [integrations.organizationId],
+      references: [organizations.id],
+    }),
+    createdByUser: one(users, {
+      fields: [integrations.createdByUserId],
+      references: [users.id],
+    }),
+    repositories: many(integrationRepositories),
+  })
+);
+
+export const integrationRepositoriesRelations = relations(
+  integrationRepositories,
+  ({ one, many }) => ({
+    integration: one(integrations, {
+      fields: [integrationRepositories.integrationId],
+      references: [integrations.id],
+    }),
+    outputs: many(repositoryOutputs),
+  })
+);
+
+export const repositoryOutputsRelations = relations(
+  repositoryOutputs,
+  ({ one }) => ({
+    repository: one(integrationRepositories, {
+      fields: [repositoryOutputs.repositoryId],
+      references: [integrationRepositories.id],
+    }),
+  })
+);
