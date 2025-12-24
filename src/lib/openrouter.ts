@@ -7,7 +7,7 @@ if (!apiKey) {
 }
 
 const headers = {
-  "HTTP-Referer": "http://localhost:3000",
+  "HTTP-Referer": "https://usenotra.com",
   "X-Title": "Notra",
 };
 
