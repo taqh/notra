@@ -3,6 +3,7 @@
 import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +24,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
+import { setLastVisitedOrganization } from "@/utils/cookies";
 import { QUERY_KEYS } from "@/utils/query-keys";
 import {
   type Organization,
@@ -91,6 +93,7 @@ function OrgSelectorSkeleton({ isCollapsed }: { isCollapsed: boolean }) {
 }
 
 export function OrgSelector() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { isMobile, state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -116,13 +119,14 @@ export function OrgSelector() {
         return;
       }
 
+      await setLastVisitedOrganization(org.slug);
+
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.AUTH.activeOrganization,
       });
 
-      toast.success("Organization updated");
-    } catch (error) {
-      console.error("Failed to switch organization:", error);
+      router.push(`/${org.slug}`);
+    } catch (_error) {
       toast.error("Failed to switch organization");
     } finally {
       setIsSwitching(false);
