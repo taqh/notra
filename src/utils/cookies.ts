@@ -2,7 +2,7 @@ import type { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { LAST_VISITED_ORGANIZATION_COOKIE } from "./constants";
 
-export const setLastVisitedOrganization = (
+export const setLastVisitedOrganization = async (
   organizationSlug: string,
   maxAge: number = 30 * 86_400
 ) => {
@@ -10,10 +10,26 @@ export const setLastVisitedOrganization = (
     typeof window !== "undefined" &&
     (window.location.protocol === "https:" ||
       process.env.NODE_ENV === "production");
-  const secureFlag = isSecure ? "; Secure" : "";
 
-  // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie needed for cross-tab persistence
-  document.cookie = `${LAST_VISITED_ORGANIZATION_COOKIE}=${organizationSlug}; max-age=${maxAge}; path=/; SameSite=Lax${secureFlag}`;
+  if (typeof window !== "undefined" && "cookieStore" in window) {
+    try {
+      const cookieOptions: CookieInit = {
+        name: LAST_VISITED_ORGANIZATION_COOKIE,
+        value: organizationSlug,
+        expires: Date.now() + maxAge * 1000,
+        path: "/",
+        sameSite: "lax",
+      };
+
+      await cookieStore.set(cookieOptions);
+    } catch (error) {
+      console.error("Failed to set cookie:", error);
+    }
+  } else if (typeof document !== "undefined") {
+    const secureFlag = isSecure ? "; Secure" : "";
+    // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API support
+    document.cookie = `${LAST_VISITED_ORGANIZATION_COOKIE}=${organizationSlug}; max-age=${maxAge}; path=/; SameSite=Lax${secureFlag}`;
+  }
 };
 
 export const getLastVisitedOrganization = (

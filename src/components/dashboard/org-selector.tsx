@@ -119,7 +119,7 @@ export function OrgSelector() {
         return;
       }
 
-      setLastVisitedOrganization(org.slug);
+      await setLastVisitedOrganization(org.slug);
 
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.AUTH.activeOrganization,
