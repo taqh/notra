@@ -82,6 +82,7 @@ Write code that is **accessible, performant, type-safe, and maintainable**. Focu
 - Avoid spread syntax in accumulators within loops
 - Use top-level regex literals instead of creating them in loops
 - Prefer specific imports over namespace imports
+- When importing zod use this "import * as z from "zod";" and if needed add this lint rule above "-biome-ignore lint/performance/noNamespaceImport: Zod recommended way to import"
 - Avoid barrel files (index files that re-export everything)
 - Use proper image components (e.g., Next.js `<Image>`) over `<img>` tags
 
@@ -121,6 +122,7 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 4. **Edge cases** - Handle boundary conditions and error states
 5. **User experience** - Accessibility, performance, and usability considerations
 6. **Documentation** - Add comments for complex logic, but prefer self-documenting code
+7. **Context7 MCP** - Use context7 for up to date documentation whenever library names are mentioned
 
 ---
 
