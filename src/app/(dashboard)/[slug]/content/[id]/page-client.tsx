@@ -214,7 +214,7 @@ export default function PageClient({
             }
             heading={title}
           >
-            <div ref={contentRef}>
+            <div className="selection:bg-primary/30" ref={contentRef}>
               <TabsContent className="mt-0" value="rendered">
                 <div
                   className="prose prose-neutral dark:prose-invert max-w-none"
