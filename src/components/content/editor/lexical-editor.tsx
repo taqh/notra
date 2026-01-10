@@ -1,6 +1,5 @@
 "use client";
 
-import { CodeNode } from "@lexical/code";
 import { HorizontalRuleNode } from "@lexical/extension";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
@@ -17,6 +16,7 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { editorTheme } from "./editor-theme";
 import { EDITOR_TRANSFORMERS } from "./markdown-transformers";
+import { KiboCodeBlockNode } from "./nodes/kibo-code-block-node";
 import { EditorAutoLinkPlugin } from "./plugins/auto-link-plugin";
 import { ComponentPickerPlugin } from "./plugins/component-picker-plugin";
 import { DraggableBlockPlugin } from "./plugins/draggable-block-plugin";
@@ -67,7 +67,7 @@ export function LexicalEditor({
         QuoteNode,
         ListNode,
         ListItemNode,
-        CodeNode,
+        KiboCodeBlockNode,
         LinkNode,
         AutoLinkNode,
         HorizontalRuleNode,

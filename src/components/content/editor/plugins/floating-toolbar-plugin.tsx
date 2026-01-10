@@ -30,6 +30,9 @@ interface FloatingToolbarProps {
   isStrikethrough: boolean;
   isCode: boolean;
   isLink: boolean;
+  linkUrl: string;
+  isLinkEditMode: boolean;
+  setIsLinkEditMode: (value: boolean) => void;
 }
 
 function FloatingToolbar({
@@ -41,11 +44,14 @@ function FloatingToolbar({
   isStrikethrough,
   isCode,
   isLink,
+  linkUrl: existingLinkUrl,
+  isLinkEditMode,
+  setIsLinkEditMode,
 }: FloatingToolbarProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
-  const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("https://");
+  const [isEditingExistingLink, setIsEditingExistingLink] = useState(false);
 
   const updatePosition = useCallback(() => {
     const selection = window.getSelection();
@@ -95,9 +101,6 @@ function FloatingToolbar({
     const handleScroll = () => updatePosition();
     const handleResize = () => updatePosition();
 
-    // Listen to both window and anchorElem scroll events
-    // Window scroll is needed because getBoundingClientRect() returns viewport-relative coords
-    // AnchorElem scroll captures scrolling within the editor container
     window.addEventListener("scroll", handleScroll);
     anchorElem.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleResize);
@@ -127,26 +130,72 @@ function FloatingToolbar({
     );
   }, [editor, updatePosition]);
 
+  // Focus input when entering link edit mode
+  useEffect(() => {
+    if (isLinkEditMode) {
+      const timeoutId = setTimeout(() => linkInputRef.current?.focus(), 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isLinkEditMode]);
+
   const handleLinkClick = useCallback(() => {
     if (isLink) {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-      setShowLinkInput(false);
+      // Edit existing link - populate with current URL
+      setLinkUrl(existingLinkUrl || "https://");
+      setIsEditingExistingLink(true);
+      setIsLinkEditMode(true);
     } else {
-      setShowLinkInput(true);
+      // Create link with placeholder URL first, then enter edit mode
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, "https://");
       setLinkUrl("https://");
-      // Focus the input after it renders
-      setTimeout(() => linkInputRef.current?.focus(), 0);
+      setIsEditingExistingLink(false);
+      setIsLinkEditMode(true);
     }
-  }, [editor, isLink]);
+  }, [editor, isLink, existingLinkUrl, setIsLinkEditMode]);
 
   const submitLink = useCallback(() => {
     const trimmedUrl = linkUrl.trim();
     if (trimmedUrl !== "" && trimmedUrl !== "https://") {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, trimmedUrl);
+      // Validate URL format
+      let isValidUrl = false;
+      try {
+        new URL(trimmedUrl);
+        isValidUrl = true;
+      } catch {
+        // Check if it's a relative URL
+        isValidUrl =
+          trimmedUrl.startsWith("/") ||
+          trimmedUrl.startsWith("./") ||
+          trimmedUrl.startsWith("../") ||
+          trimmedUrl.startsWith("#") ||
+          trimmedUrl.startsWith("?");
+      }
+
+      if (isValidUrl) {
+        editor.dispatchCommand(TOGGLE_LINK_COMMAND, trimmedUrl);
+      } else {
+        // Invalid URL format, remove the link
+        editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+      }
+    } else {
+      // Remove the link if URL is empty
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
     }
-    setShowLinkInput(false);
+    setIsLinkEditMode(false);
     setLinkUrl("https://");
-  }, [editor, linkUrl]);
+    setIsEditingExistingLink(false);
+  }, [editor, linkUrl, setIsLinkEditMode]);
+
+  const cancelLinkEdit = useCallback(() => {
+    // Only remove the link if we're canceling a new link creation
+    // If editing an existing link, keep the original URL
+    if (!isEditingExistingLink) {
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+    }
+    setIsLinkEditMode(false);
+    setLinkUrl("https://");
+    setIsEditingExistingLink(false);
+  }, [editor, isEditingExistingLink, setIsLinkEditMode]);
 
   const handleLinkKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -154,11 +203,11 @@ function FloatingToolbar({
         e.preventDefault();
         submitLink();
       } else if (e.key === "Escape") {
-        setShowLinkInput(false);
-        setLinkUrl("https://");
+        e.preventDefault();
+        cancelLinkEdit();
       }
     },
-    [submitLink]
+    [submitLink, cancelLinkEdit]
   );
 
   const buttonClass = (active: boolean) =>
@@ -221,14 +270,14 @@ function FloatingToolbar({
       <div className="mx-1 h-4 w-px bg-border" />
       <button
         aria-label="Insert link"
-        className={buttonClass(isLink)}
+        className={buttonClass(isLink || isLinkEditMode)}
         onClick={handleLinkClick}
         title="Link"
         type="button"
       >
         <Link className="size-4" />
       </button>
-      {showLinkInput && (
+      {isLinkEditMode && (
         <div className="ml-1 flex items-center gap-1">
           <input
             aria-label="URL"
@@ -284,6 +333,8 @@ export function FloatingToolbarPlugin({
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [isCode, setIsCode] = useState(false);
   const [isLink, setIsLink] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [isLinkEditMode, setIsLinkEditMode] = useState(false);
 
   const updateToolbar = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -310,23 +361,30 @@ export function FloatingToolbarPlugin({
       setIsCode(selection.hasFormat("code"));
 
       const parent = node.getParent();
-      setIsLink($isLinkNode(parent) || $isLinkNode(node));
+      const isParentLink = $isLinkNode(parent);
+      const isNodeLink = $isLinkNode(node);
+      const hasLink = isParentLink || isNodeLink;
+      setIsLink(hasLink);
+      if (isParentLink) {
+        setLinkUrl(parent.getURL());
+      } else if (isNodeLink) {
+        setLinkUrl(node.getURL());
+      } else {
+        setLinkUrl("");
+      }
 
       const textContent = selection.getTextContent().replace(/\n/g, "");
-      // Check textContent instead of node type to support multi-node selections
       setIsText(textContent !== "");
     });
   }, [editor]);
 
   useEffect(() => {
-    // Scope selectionchange to this editor to avoid conflicts with multiple editors
     const handleSelectionChange = () => {
       const rootElement = editor.getRootElement();
       if (rootElement === null) {
         return;
       }
       const selection = window.getSelection();
-      // Only update if selection is within this editor
       if (
         selection !== null &&
         selection.anchorNode !== null &&
@@ -355,7 +413,8 @@ export function FloatingToolbarPlugin({
     );
   }, [editor, updateToolbar]);
 
-  if (!isText) {
+  // Keep toolbar visible while in link edit mode even if selection changes
+  if (!(isText || isLinkEditMode)) {
     return null;
   }
 
@@ -367,8 +426,11 @@ export function FloatingToolbarPlugin({
       isCode={isCode}
       isItalic={isItalic}
       isLink={isLink}
+      isLinkEditMode={isLinkEditMode}
       isStrikethrough={isStrikethrough}
       isUnderline={isUnderline}
+      linkUrl={linkUrl}
+      setIsLinkEditMode={setIsLinkEditMode}
     />,
     anchorElem
   );
