@@ -7,126 +7,126 @@ import type { InputIntegrationType } from "@/utils/schemas/integrations";
 import { webhookParamsSchema } from "@/utils/schemas/webhooks";
 
 interface RouteContext {
-	params: Promise<{
-		provider: InputIntegrationType;
-		organizationId: string;
-		integrationId: string;
-	}>;
+  params: Promise<{
+    provider: string;
+    organizationId: string;
+    integrationId: string;
+  }>;
 }
 
 const WEBHOOK_HANDLERS: Record<InputIntegrationType, WebhookHandler | null> = {
-	github: handleGitHubWebhook,
-	linear: handleLinearWebhook,
-	slack: null,
+  github: handleGitHubWebhook,
+  linear: handleLinearWebhook,
+  slack: null,
 };
 
 type IntegrationFetcher = (
-	integrationId: string,
+  integrationId: string,
 ) => Promise<{ organizationId: string; enabled: boolean } | null | undefined>;
 
 const INTEGRATION_FETCHERS: Record<
-	InputIntegrationType,
-	IntegrationFetcher | null
+  InputIntegrationType,
+  IntegrationFetcher | null
 > = {
-	github: async (integrationId) => {
-		const integration = await getGitHubIntegrationById(integrationId);
-		if (!integration) {
-			return null;
-		}
-		return {
-			organizationId: integration.organizationId,
-			enabled: integration.enabled,
-		};
-	},
-	linear: null,
-	slack: null,
+  github: async (integrationId) => {
+    const integration = await getGitHubIntegrationById(integrationId);
+    if (!integration) {
+      return null;
+    }
+    return {
+      organizationId: integration.organizationId,
+      enabled: integration.enabled,
+    };
+  },
+  linear: null,
+  slack: null,
 };
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
-	const rawParams = await params;
+  const rawParams = await params;
 
-	const validation = webhookParamsSchema.safeParse(rawParams);
-	if (!validation.success) {
-		return NextResponse.json(
-			{
-				error: "Invalid webhook parameters",
-				details: validation.error.issues,
-			},
-			{ status: 400 },
-		);
-	}
+  const validation = webhookParamsSchema.safeParse(rawParams);
+  if (!validation.success) {
+    return NextResponse.json(
+      {
+        error: "Invalid webhook parameters",
+        details: validation.error.issues,
+      },
+      { status: 400 },
+    );
+  }
 
-	const { provider, organizationId, integrationId } = validation.data;
+  const { provider, organizationId, integrationId } = validation.data;
 
-	const fetcher = INTEGRATION_FETCHERS[provider];
-	if (!fetcher) {
-		return NextResponse.json(
-			{ error: `Provider ${provider} is not yet supported` },
-			{ status: 501 },
-		);
-	}
+  const fetcher = INTEGRATION_FETCHERS[provider];
+  if (!fetcher) {
+    return NextResponse.json(
+      { error: `Provider ${provider} is not yet supported` },
+      { status: 501 },
+    );
+  }
 
-	try {
-		const integration = await fetcher(integrationId);
+  try {
+    const integration = await fetcher(integrationId);
 
-		if (!integration) {
-			return NextResponse.json(
-				{ error: "Integration not found" },
-				{ status: 404 },
-			);
-		}
+    if (!integration) {
+      return NextResponse.json(
+        { error: "Integration not found" },
+        { status: 404 },
+      );
+    }
 
-		if (integration.organizationId !== organizationId) {
-			return NextResponse.json(
-				{ error: "Integration does not belong to this organization" },
-				{ status: 403 },
-			);
-		}
+    if (integration.organizationId !== organizationId) {
+      return NextResponse.json(
+        { error: "Integration does not belong to this organization" },
+        { status: 403 },
+      );
+    }
 
-		if (!integration.enabled) {
-			return NextResponse.json(
-				{ error: "Integration is disabled" },
-				{ status: 403 },
-			);
-		}
+    if (!integration.enabled) {
+      return NextResponse.json(
+        { error: "Integration is disabled" },
+        { status: 403 },
+      );
+    }
 
-		const handler = WEBHOOK_HANDLERS[provider];
-		if (!handler) {
-			return NextResponse.json(
-				{ error: `Webhook handler for ${provider} is not yet implemented` },
-				{ status: 501 },
-			);
-		}
+    const handler = WEBHOOK_HANDLERS[provider];
+    if (!handler) {
+      return NextResponse.json(
+        { error: `Webhook handler for ${provider} is not yet implemented` },
+        { status: 501 },
+      );
+    }
 
-		const rawBody = await request.text();
+    const rawBody = await request.text();
 
-		const context: WebhookContext = {
-			provider,
-			organizationId,
-			integrationId,
-			request,
-			rawBody,
-		};
+    const context: WebhookContext = {
+      provider,
+      organizationId,
+      integrationId,
+      request,
+      rawBody,
+    };
 
-		const result = await handler(context);
+    const result = await handler(context);
 
-		if (!result.success) {
-			return NextResponse.json(
-				{ error: result.message ?? "Webhook processing failed" },
-				{ status: 400 },
-			);
-		}
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.message ?? "Webhook processing failed" },
+        { status: 400 },
+      );
+    }
 
-		return NextResponse.json({
-			received: true,
-			message: result.message,
-			data: result.data,
-		});
-	} catch (error) {
-		console.error("Webhook processing error:", error);
-		return NextResponse.json(
-			{ error: "Internal server error processing webhook" },
-			{ status: 500 },
-		);
-	}
+    return NextResponse.json({
+      received: true,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    console.error("Webhook processing error:", error);
+    return NextResponse.json(
+      { error: "Internal server error processing webhook" },
+      { status: 500 },
+    );
+  }
 }
