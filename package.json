@@ -6,7 +6,13 @@
     "dev": "dotenv -- turbo run dev",
     "lint": "dotenv -- turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "dotenv -- turbo run check-types"
+    "check-types": "dotenv -- turbo run check-types",
+    "db:generate": "dotenv -- bunx drizzle-kit generate --config packages/db/drizzle.config.ts",
+    "db:migrate": "dotenv -- bunx drizzle-kit migrate --config packages/db/drizzle.config.ts",
+    "db:push": "dotenv -- bunx drizzle-kit push --config packages/db/drizzle.config.ts",
+    "db:studio": "dotenv -- bunx drizzle-kit studio --config packages/db/drizzle.config.ts",
+    "db:drop": "dotenv -- bunx drizzle-kit drop --config packages/db/drizzle.config.ts",
+    "db:pull": "dotenv -- bunx drizzle-kit pull --config packages/db/drizzle.config.ts"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",

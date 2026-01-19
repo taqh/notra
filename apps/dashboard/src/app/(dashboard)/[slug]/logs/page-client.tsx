@@ -30,7 +30,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
         throw new Error("Organization ID is required");
       }
       const response = await fetch(
-        `/api/organizations/${organizationId}/webhook-logs?page=${page}&pageSize=10`
+        `/api/organizations/${organizationId}/webhook-logs?integrationType=github&integrationId=all&page=${page}&pageSize=10`,
       );
 
       if (!response.ok) {
@@ -56,7 +56,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
         <Alert>
           <HugeiconsIcon className="size-4" icon={InformationCircleIcon} />
           <AlertDescription>
-            Log data is retained for 30 days. Older entries are automatically
+            Log data is retained for 7 days. Older entries are automatically
             removed.
           </AlertDescription>
         </Alert>

@@ -11,13 +11,26 @@ import {
   CardTitle,
 } from "@notra/ui/components/ui/card";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@notra/ui/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@notra/ui/components/ui/dropdown-menu";
+import { Input } from "@notra/ui/components/ui/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import type { IntegrationCardProps } from "@/types/integrations";
 import { QUERY_KEYS } from "@/utils/query-keys";
@@ -30,6 +43,11 @@ export function IntegrationCard({
 }: IntegrationCardProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const deleteConfirmationText = integration.displayName;
+  const isDeleteConfirmMatch =
+    deleteConfirmation.trim() === deleteConfirmationText;
 
   const toggleMutation = useMutation({
     mutationFn: async (enabled: boolean) => {
@@ -39,7 +57,7 @@ export function IntegrationCard({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ enabled }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -66,7 +84,7 @@ export function IntegrationCard({
         `/api/organizations/${organizationId}/integrations/${integration.id}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -88,20 +106,35 @@ export function IntegrationCard({
   });
 
   const handleToggle = () => {
+    console.log("handleToggle called", {
+      integrationId: integration.id,
+      currentEnabled: integration.enabled,
+    });
     toggleMutation.mutate(!integration.enabled);
   };
 
   const handleDelete = () => {
-    // biome-ignore lint: Using browser confirm for simple deletion confirmation
-    if (!window.confirm("Are you sure you want to delete this integration?")) {
-      return;
-    }
+    console.log("handleDelete called", { integrationId: integration.id });
     deleteMutation.mutate();
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteConfirmation("");
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    handleDelete();
+    setIsDeleteDialogOpen(false);
   };
 
   const isLoading = toggleMutation.isPending || deleteMutation.isPending;
 
-  const handleCardClick = () => {
+  const handleCardClick = (event: MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("[data-no-card-click]")) {
+      return;
+    }
     router.push(`/${organizationSlug}/integrations/github/${integration.id}`);
   };
 
@@ -125,9 +158,15 @@ export function IntegrationCard({
           )}
         </CardDescription>
         <CardAction>
+          {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Event propagation barrier */}
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: Event propagation barrier */}
           <div
             className="flex items-center gap-2"
-            onClickCapture={(e) => e.stopPropagation()}
+            data-no-card-click
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+            role="presentation"
+            tabIndex={-1}
           >
             <Badge variant={integration.enabled ? "default" : "secondary"}>
               {integration.enabled ? "Enabled" : "Disabled"}
@@ -155,12 +194,22 @@ export function IntegrationCard({
                 }
               />
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleToggle}>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleToggle();
+                  }}
+                >
                   {integration.enabled ? "Disable" : "Enable"}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="text-destructive"
-                  onClick={handleDelete}
+                  className="cursor-pointer"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteClick();
+                  }}
+                  variant="destructive"
                 >
                   Delete
                 </DropdownMenuItem>
@@ -181,6 +230,55 @@ export function IntegrationCard({
           )}
         </div>
       </CardContent>
+      <AlertDialog
+        onOpenChange={setIsDeleteDialogOpen}
+        open={isDeleteDialogOpen}
+      >
+        <AlertDialogContent className="sm:max-w-[520px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg">
+              Delete {integration.displayName}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action permanently removes the integration and all connected
+              metadata. Type{" "}
+              <span className="font-semibold">{deleteConfirmationText}</span> to
+              confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <Input
+              aria-label="Confirm integration deletion"
+              autoComplete="off"
+              onChange={(event) => setDeleteConfirmation(event.target.value)}
+              placeholder={deleteConfirmationText}
+              value={deleteConfirmation}
+            />
+            <p className="text-muted-foreground text-xs">
+              Deletion is permanent and cannot be undone.
+            </p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={deleteMutation.isPending}
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending || !isDeleteConfirmMatch}
+              onClick={(event) => {
+                event.preventDefault();
+                handleDeleteConfirm();
+              }}
+              type="button"
+              variant="destructive"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete integration"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

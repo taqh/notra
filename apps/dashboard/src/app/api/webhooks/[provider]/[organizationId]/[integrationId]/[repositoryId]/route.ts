@@ -1,16 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getGitHubIntegrationById } from "@/lib/services/github-integration";
+import {
+  getGitHubIntegrationById,
+  getRepositoryById,
+} from "@/lib/services/github-integration";
 import { handleGitHubWebhook } from "@/lib/webhooks/github";
 import { handleLinearWebhook } from "@/lib/webhooks/linear";
 import type { WebhookContext, WebhookHandler } from "@/types/webhooks";
 import type { InputIntegrationType } from "@/utils/schemas/integrations";
-import { webhookParamsSchema } from "@/utils/schemas/webhooks";
+import { webhookParamsWithRepoSchema } from "@/utils/schemas/webhooks";
 
 interface RouteContext {
   params: Promise<{
     provider: string;
     organizationId: string;
     integrationId: string;
+    repositoryId: string;
   }>;
 }
 
@@ -21,7 +25,7 @@ const WEBHOOK_HANDLERS: Record<InputIntegrationType, WebhookHandler | null> = {
 };
 
 type IntegrationFetcher = (
-  integrationId: string,
+  integrationId: string
 ) => Promise<{ organizationId: string; enabled: boolean } | null | undefined>;
 
 const INTEGRATION_FETCHERS: Record<
@@ -45,24 +49,25 @@ const INTEGRATION_FETCHERS: Record<
 export async function POST(request: NextRequest, { params }: RouteContext) {
   const rawParams = await params;
 
-  const validation = webhookParamsSchema.safeParse(rawParams);
+  const validation = webhookParamsWithRepoSchema.safeParse(rawParams);
   if (!validation.success) {
     return NextResponse.json(
       {
         error: "Invalid webhook parameters",
         details: validation.error.issues,
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
-  const { provider, organizationId, integrationId } = validation.data;
+  const { provider, organizationId, integrationId, repositoryId } =
+    validation.data;
 
   const fetcher = INTEGRATION_FETCHERS[provider];
   if (!fetcher) {
     return NextResponse.json(
       { error: `Provider ${provider} is not yet supported` },
-      { status: 501 },
+      { status: 501 }
     );
   }
 
@@ -72,21 +77,37 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if (!integration) {
       return NextResponse.json(
         { error: "Integration not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
     if (integration.organizationId !== organizationId) {
       return NextResponse.json(
         { error: "Integration does not belong to this organization" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
     if (!integration.enabled) {
       return NextResponse.json(
         { error: "Integration is disabled" },
-        { status: 403 },
+        { status: 403 }
+      );
+    }
+
+    // Verify repository belongs to this integration
+    const repository = await getRepositoryById(repositoryId);
+    if (!repository) {
+      return NextResponse.json(
+        { error: "Repository not found" },
+        { status: 404 }
+      );
+    }
+
+    if (repository.integration.id !== integrationId) {
+      return NextResponse.json(
+        { error: "Repository does not belong to this integration" },
+        { status: 403 }
       );
     }
 
@@ -94,7 +115,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if (!handler) {
       return NextResponse.json(
         { error: `Webhook handler for ${provider} is not yet implemented` },
-        { status: 501 },
+        { status: 501 }
       );
     }
 
@@ -104,6 +125,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       provider,
       organizationId,
       integrationId,
+      repositoryId,
       request,
       rawBody,
     };
@@ -113,7 +135,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if (!result.success) {
       return NextResponse.json(
         { error: result.message ?? "Webhook processing failed" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -126,7 +148,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     console.error("Webhook processing error:", error);
     return NextResponse.json(
       { error: "Internal server error processing webhook" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

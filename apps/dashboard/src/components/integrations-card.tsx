@@ -1,6 +1,16 @@
 "use client";
 
 import { TitleCard } from "@/components/title-card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@notra/ui/components/ui/alert-dialog";
 import { Badge } from "@notra/ui/components/ui/badge";
 import { Button } from "@notra/ui/components/ui/button";
 import {
@@ -9,8 +19,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@notra/ui/components/ui/dropdown-menu";
+import { Input } from "@notra/ui/components/ui/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
+import { useState } from "react";
 import type React from "react";
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/utils/query-keys";
@@ -54,6 +67,11 @@ export function InstalledIntegrationCard({
 }: InstalledIntegrationCardProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const deleteConfirmationText = integration.displayName;
+  const isDeleteConfirmMatch =
+    deleteConfirmation.trim() === deleteConfirmationText;
 
   const toggleMutation = useMutation({
     mutationFn: async (enabled: boolean) => {
@@ -63,7 +81,7 @@ export function InstalledIntegrationCard({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ enabled }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -90,7 +108,7 @@ export function InstalledIntegrationCard({
         `/api/organizations/${organizationId}/integrations/${integration.id}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -116,18 +134,28 @@ export function InstalledIntegrationCard({
   };
 
   const handleDelete = () => {
-    // biome-ignore lint: Using browser confirm for simple deletion confirmation
-    if (!window.confirm("Are you sure you want to delete this integration?")) {
-      return;
-    }
     deleteMutation.mutate();
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteConfirmation("");
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    handleDelete();
+    setIsDeleteDialogOpen(false);
   };
 
   const isLoading = toggleMutation.isPending || deleteMutation.isPending;
 
-  const handleCardClick = () => {
+  const handleCardClick = (event: MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("[data-no-card-click]")) {
+      return;
+    }
     router.push(
-      `/${organizationSlug}/integrations/${integration.type}/${integration.id}`
+      `/${organizationSlug}/integrations/${integration.type}/${integration.id}`,
     );
   };
 
@@ -141,51 +169,64 @@ export function InstalledIntegrationCard({
     <TitleCard
       accentColor={accentColor}
       action={
-        // biome-ignore lint/a11y/noNoninteractiveElementInteractions: Event propagation barrier
-        // biome-ignore lint/a11y/noStaticElementInteractions: Event propagation barrier
-        <div
-          className="flex items-center gap-1.5 sm:gap-2"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          <Badge variant={integration.enabled ? "default" : "secondary"}>
-            {integration.enabled ? "Enabled" : "Disabled"}
-          </Badge>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button disabled={isLoading} size="icon-sm" variant="ghost">
-                  <svg
-                    aria-label="More options"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <title>More options</title>
-                    <circle cx="12" cy="12" r="1" />
-                    <circle cx="12" cy="5" r="1" />
-                    <circle cx="12" cy="19" r="1" />
-                  </svg>
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleToggle}>
-                {integration.enabled ? "Disable" : "Enable"}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={handleDelete}
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <>
+          {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Event propagation barrier */}
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: Event propagation barrier */}
+          <div
+            className="flex items-center gap-1.5 sm:gap-2"
+            data-no-card-click
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            <Badge variant={integration.enabled ? "default" : "secondary"}>
+              {integration.enabled ? "Enabled" : "Disabled"}
+            </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button disabled={isLoading} size="icon-sm" variant="ghost">
+                    <svg
+                      aria-label="More options"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <title>More options</title>
+                      <circle cx="12" cy="12" r="1" />
+                      <circle cx="12" cy="5" r="1" />
+                      <circle cx="12" cy="19" r="1" />
+                    </svg>
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleToggle();
+                  }}
+                >
+                  {integration.enabled ? "Disable" : "Enable"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteClick();
+                  }}
+                  variant="destructive"
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </>
       }
       className="cursor-pointer transition-colors hover:bg-muted/80"
       heading={integration.displayName}
@@ -193,6 +234,59 @@ export function InstalledIntegrationCard({
       onClick={handleCardClick}
     >
       <p className="text-muted-foreground text-sm">{repositoryText}</p>
+      <AlertDialog
+        onOpenChange={setIsDeleteDialogOpen}
+        open={isDeleteDialogOpen}
+      >
+        <AlertDialogContent className="sm:max-w-[520px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg">
+              Delete {integration.displayName}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action permanently removes the integration and all connected
+              metadata. Type{" "}
+              <span className="font-semibold">{deleteConfirmationText}</span> to
+              confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <Input
+              aria-label="Confirm integration deletion"
+              autoComplete="off"
+              onChange={(event) => setDeleteConfirmation(event.target.value)}
+              placeholder={deleteConfirmationText}
+              value={deleteConfirmation}
+            />
+            <p className="text-muted-foreground text-xs">
+              Deletion is permanent and cannot be undone.
+            </p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={deleteMutation.isPending}
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsDeleteDialogOpen(false);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending || !isDeleteConfirmMatch}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                handleDeleteConfirm();
+              }}
+              type="button"
+              variant="destructive"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete integration"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TitleCard>
   );
 }

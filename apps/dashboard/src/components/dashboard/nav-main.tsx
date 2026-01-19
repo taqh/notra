@@ -59,6 +59,12 @@ const navMainItems: NavMainItem[] = [
     category: "utility",
   },
   {
+    link: "/triggers",
+    icon: AnalyticsUpIcon,
+    label: "Triggers",
+    category: "utility",
+  },
+  {
     link: "/logs",
     icon: AnalyticsUpIcon,
     label: "Logs",

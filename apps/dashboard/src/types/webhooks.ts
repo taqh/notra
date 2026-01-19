@@ -5,6 +5,7 @@ export interface WebhookContext {
 	provider: InputIntegrationType;
 	organizationId: string;
 	integrationId: string;
+	repositoryId: string;
 	request: NextRequest;
 	rawBody: string;
 }

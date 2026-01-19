@@ -18,6 +18,7 @@ export interface Log {
   status: WebhookLogStatus;
   statusCode: number | null;
   errorMessage: string | null;
+  payload?: Record<string, unknown> | null;
   createdAt: string;
 }
 

@@ -13,9 +13,15 @@ import {
   AlertDialogTrigger,
 } from "@notra/ui/components/ui/alert-dialog";
 import { Badge } from "@notra/ui/components/ui/badge";
-import { Field, FieldLabel } from "@notra/ui/components/ui/field";
+import { Button } from "@notra/ui/components/ui/button";
+import {
+  Field,
+  FieldDescription,
+  FieldLabel,
+} from "@notra/ui/components/ui/field";
 import { Input } from "@notra/ui/components/ui/input";
-import { Textarea } from "@notra/ui/components/ui/textarea";
+import { Skeleton } from "@notra/ui/components/ui/skeleton";
+
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -25,6 +31,7 @@ import { toast } from "sonner";
 import { parseGitHubUrl } from "@/lib/utils/github";
 import type {
   AddIntegrationDialogProps,
+  GitHubIntegration,
   GitHubRepoInfo,
 } from "@/types/integrations";
 import { QUERY_KEYS } from "@/utils/query-keys";
@@ -32,6 +39,7 @@ import {
   type AddGitHubIntegrationFormValues,
   addGitHubIntegrationFormSchema,
 } from "@/utils/schemas/integrations";
+import { WebhookSetupDialog } from "./wehook-setup-dialog";
 
 export function AddIntegrationDialog({
   organizationId: propOrganizationId,
@@ -49,6 +57,9 @@ export function AddIntegrationDialog({
   const open = controlledOpen ?? internalOpen;
   const setOpen = controlledOnOpenChange ?? setInternalOpen;
   const queryClient = useQueryClient();
+  const [createdIntegration, setCreatedIntegration] =
+    useState<GitHubIntegration | null>(null);
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async (values: AddGitHubIntegrationFormValues) => {
@@ -71,7 +82,7 @@ export function AddIntegrationDialog({
             token: values.token?.trim() || null,
             type: "github" as const,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -82,7 +93,7 @@ export function AddIntegrationDialog({
 
       return data;
     },
-    onSuccess: (integration) => {
+    onSuccess: (integration: GitHubIntegration) => {
       if (organizationId) {
         queryClient.invalidateQueries({
           queryKey: QUERY_KEYS.INTEGRATIONS.all(organizationId),
@@ -93,11 +104,9 @@ export function AddIntegrationDialog({
       form.reset();
       onSuccess?.();
 
-      if (organizationSlug && integration?.id) {
-        router.push(
-          `/${organizationSlug}/integrations/github/${integration.id}`
-        );
-      }
+      // Show webhook setup dialog
+      setCreatedIntegration(integration);
+      setShowWebhookDialog(true);
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -129,6 +138,21 @@ export function AddIntegrationDialog({
     trigger && isValidElement(trigger) ? (
       <AlertDialogTrigger render={trigger as React.ReactElement} />
     ) : null;
+
+  const handleWebhookDialogClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Navigate to the integration page when webhook dialog is closed
+      if (organizationSlug && createdIntegration?.id) {
+        router.push(
+          `/${organizationSlug}/integrations/github/${createdIntegration.id}`,
+        );
+      }
+      setShowWebhookDialog(false);
+      setCreatedIntegration(null);
+    }
+  };
+
+  const firstRepository = createdIntegration?.repositories?.[0];
 
   return (
     <>
@@ -185,7 +209,9 @@ export function AddIntegrationDialog({
                       <p className="mt-1 text-destructive text-sm">
                         {typeof field.state.meta.errors[0] === "string"
                           ? field.state.meta.errors[0]
-                          : String(field.state.meta.errors[0])}
+                          : ((
+                              field.state.meta.errors[0] as { message?: string }
+                            )?.message ?? "Invalid value")}
                       </p>
                     ) : null}
                     {repoInfo ? (
@@ -223,12 +249,11 @@ export function AddIntegrationDialog({
                       Only required for private repositories. Public repos work
                       without a token.
                     </p>
-                    <Textarea
+                    <Input
                       disabled={mutation.isPending}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="ghp_... (leave empty for public repos)"
-                      rows={3}
                       value={field.state.value}
                     />
                     <p className="mt-1 text-muted-foreground text-xs">
@@ -268,6 +293,16 @@ export function AddIntegrationDialog({
           </form>
         </AlertDialogContent>
       </AlertDialog>
+      {firstRepository && organizationId ? (
+        <WebhookSetupDialog
+          onOpenChange={handleWebhookDialogClose}
+          open={showWebhookDialog}
+          organizationId={organizationId}
+          owner={firstRepository.owner}
+          repo={firstRepository.repo}
+          repositoryId={firstRepository.id}
+        />
+      ) : null}
     </>
   );
 }

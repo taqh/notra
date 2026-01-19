@@ -41,7 +41,7 @@ export const addGitHubIntegrationFormSchema = z.object({
     .min(1, "Repository URL is required")
     .refine(
       (value) => isValidGitHubUrl(value),
-      "Invalid GitHub repository URL or format. Use: https://github.com/owner/repo, git@github.com:owner/repo, or owner/repo"
+      "Invalid GitHub repository URL or format. Use: https://github.com/owner/repo, git@github.com:owner/repo, or owner/repo",
     ),
   token: z.string().optional().nullable(),
 });
@@ -68,14 +68,20 @@ export const addRepositoryFormSchema = z.object({
 export type AddRepositoryFormValues = z.infer<typeof addRepositoryFormSchema>;
 
 export const addRepositoryRequestSchema = z.object({
-  owner: z.string().min(1, "Repository owner is required"),
-  repo: z.string().min(1, "Repository name is required"),
+  owner: z
+    .string()
+    .min(1, "Repository owner is required")
+    .transform((value) => value.trim()),
+  repo: z
+    .string()
+    .min(1, "Repository name is required")
+    .transform((value) => value.trim()),
   outputs: z
     .array(
       z.object({
         type: z.enum(OUTPUT_CONTENT_TYPES),
         enabled: z.boolean(),
-      })
+      }),
     )
     .optional()
     .default([
@@ -138,3 +144,49 @@ export const configureOutputBodySchema = z.object({
   config: z.record(z.string(), z.unknown()).optional(),
 });
 export type ConfigureOutputBody = z.infer<typeof configureOutputBodySchema>;
+
+export const WEBHOOK_EVENT_TYPES = ["release", "push", "star"] as const;
+export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[number];
+
+export const CRON_CADENCES = ["daily", "weekly", "monthly"] as const;
+export type CronCadence = (typeof CRON_CADENCES)[number];
+
+export const triggerSourceTypeSchema = z.enum([
+  "github_webhook",
+  "linear_webhook",
+  "cron",
+  "manual",
+]);
+
+export const triggerSourceConfigSchema = z.object({
+  eventTypes: z.array(z.enum(WEBHOOK_EVENT_TYPES)).optional(),
+  cron: z
+    .object({
+      cadence: z.enum(CRON_CADENCES),
+      hour: z.number().min(0).max(23),
+      minute: z.number().min(0).max(59),
+      dayOfWeek: z.number().min(0).max(6).optional(),
+      dayOfMonth: z.number().min(1).max(31).optional(),
+    })
+    .optional(),
+});
+
+export const triggerTargetsSchema = z.object({
+  repositoryIds: z.array(z.string()).min(1),
+});
+
+export const triggerOutputConfigSchema = z
+  .object({
+    publishDestination: z.enum(["webflow", "framer", "custom"]).optional(),
+  })
+  .optional();
+
+export const configureTriggerBodySchema = z.object({
+  sourceType: triggerSourceTypeSchema,
+  sourceConfig: triggerSourceConfigSchema,
+  targets: triggerTargetsSchema,
+  outputType: z.enum(OUTPUT_CONTENT_TYPES),
+  outputConfig: triggerOutputConfigSchema,
+  enabled: z.boolean(),
+});
+export type ConfigureTriggerBody = z.infer<typeof configureTriggerBodySchema>;

@@ -106,7 +106,8 @@ function RepositorySelector({
           <p className="mt-1 text-destructive text-sm">
             {typeof field.state.meta.errors[0] === "string"
               ? field.state.meta.errors[0]
-              : String(field.state.meta.errors[0])}
+              : ((field.state.meta.errors[0] as { message?: string })
+                  ?.message ?? "Invalid value")}
           </p>
         ) : null}
       </>
@@ -133,7 +134,8 @@ function RepositorySelector({
         <p className="mt-1 text-destructive text-sm">
           {typeof field.state.meta.errors[0] === "string"
             ? field.state.meta.errors[0]
-            : String(field.state.meta.errors[0])}
+            : ((field.state.meta.errors[0] as { message?: string })?.message ??
+              "Invalid value")}
         </p>
       ) : null}
     </>
@@ -162,7 +164,11 @@ export function AddRepositoryDialog({
       if (!response.ok) {
         throw new Error("Failed to fetch repositories");
       }
-      return response.json() as Promise<AvailableRepo[]>;
+      const repos = (await response.json()) as AvailableRepo[];
+      const uniqueRepos = Array.from(
+        new Map(repos.map((repo) => [repo.fullName, repo])).values(),
+      );
+      return uniqueRepos;
     },
     enabled: open && !!organizationId,
   });
@@ -174,14 +180,17 @@ export function AddRepositoryDialog({
         throw new Error("Invalid repository format");
       }
 
+      const normalizedOwner = parsed.owner.trim();
+      const normalizedRepo = parsed.repo.trim();
+
       const response = await fetch(
         `/api/organizations/${organizationId}/integrations/${integrationId}/repositories`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            owner: parsed.owner,
-            repo: parsed.repo,
+            owner: normalizedOwner,
+            repo: normalizedRepo,
             outputs: [
               { type: "changelog", enabled: true },
               { type: "blog_post", enabled: false },
@@ -213,7 +222,11 @@ export function AddRepositoryDialog({
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      const message =
+        error.message === "Repository already connected"
+          ? "Repository already connected"
+          : error.message;
+      toast.error(message);
     },
   });
 
@@ -301,7 +314,9 @@ export function AddRepositoryDialog({
                       <p className="mt-1 text-destructive text-sm">
                         {typeof field.state.meta.errors[0] === "string"
                           ? field.state.meta.errors[0]
-                          : String(field.state.meta.errors[0])}
+                          : ((
+                              field.state.meta.errors[0] as { message?: string }
+                            )?.message ?? "Invalid value")}
                       </p>
                     ) : null}
                     <p className="mt-1 text-muted-foreground text-xs">

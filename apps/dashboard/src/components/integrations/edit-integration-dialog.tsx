@@ -141,7 +141,8 @@ export function EditIntegrationDialog({
                       <p className="mt-1 text-destructive text-sm">
                         {typeof field.state.meta.errors[0] === "string"
                           ? field.state.meta.errors[0]
-                          : String(field.state.meta.errors[0])}
+                          : (field.state.meta.errors[0] as { message?: string })
+                              ?.message ?? "Invalid value"}
                       </p>
                     ) : null}
                   </Field>

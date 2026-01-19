@@ -80,10 +80,13 @@ function DropdownMenuItem({
   className,
   inset,
   variant = "default",
+  onClick,
+  children,
   ...props
 }: MenuPrimitive.Item.Props & {
   inset?: boolean;
   variant?: "default" | "destructive";
+  onClick?: (event: React.MouseEvent) => void;
 }) {
   return (
     <MenuPrimitive.Item
@@ -94,8 +97,11 @@ function DropdownMenuItem({
       data-inset={inset}
       data-slot="dropdown-menu-item"
       data-variant={variant}
+      onClick={onClick}
       {...props}
-    />
+    >
+      {children}
+    </MenuPrimitive.Item>
   );
 }
 
