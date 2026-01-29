@@ -37,7 +37,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       prompt,
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({
+      onError: (error) => {
+        console.error("[Changelog] Stream error:", error);
+        if (error instanceof Error) {
+          return error.message;
+        }
+        return "An error occurred while generating the changelog.";
+      },
+    });
   } catch (error) {
     console.error("Error generating changelog:", error);
     return NextResponse.json(

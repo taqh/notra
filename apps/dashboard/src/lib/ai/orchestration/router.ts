@@ -1,4 +1,4 @@
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { ROUTING_PROMPT } from "@/lib/ai/prompts/router";
 import { openrouter } from "@/lib/openrouter";
 import { routingDecisionSchema } from "./schemas";
@@ -20,16 +20,16 @@ export async function routeMessage(
 
   const routerModel = openrouter(MODELS.router);
 
-  const { object } = await generateObject({
+  const { output } = await generateText({
     model: routerModel,
-    schema: routingDecisionSchema,
+    output: Output.object({ schema: routingDecisionSchema }),
     system: ROUTING_PROMPT,
     prompt: `Classify this user message:
 
 "${userMessage}"${contextHint}`,
   });
 
-  return object;
+  return output;
 }
 
 export function selectModel(decision: RoutingDecision): string {

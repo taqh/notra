@@ -84,6 +84,13 @@ export async function orchestrateChat(
     messages: await convertToModelMessages(messages),
     tools,
     stopWhen: stepCountIs(maxSteps),
+    onError({ error }) {
+      console.error("[Chat Stream Error]", {
+        organizationId,
+        model: routingDecision.model,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    },
   });
 
   return { stream, routingDecision };
