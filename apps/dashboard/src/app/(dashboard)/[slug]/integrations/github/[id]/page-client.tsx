@@ -2,6 +2,7 @@
 
 import { RepositoryList } from "@/components/integrations/repository-list";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
+import { GitHubIntegrationDetailSkeleton } from "./skeleton";
 import { Badge } from "@notra/ui/components/ui/badge";
 import { Button } from "@notra/ui/components/ui/button";
 import {
@@ -10,7 +11,6 @@ import {
   CollapsibleTrigger,
 } from "@notra/ui/components/ui/collapsible";
 import { Input } from "@notra/ui/components/ui/input";
-import { Skeleton } from "@notra/ui/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon, ChevronDownIcon, CopyIcon } from "lucide-react";
 import Link from "next/link";
@@ -128,7 +128,7 @@ export default function PageClient({ integrationId }: PageClientProps) {
   const { activeOrganization } = useOrganizationsContext();
   const organizationId = activeOrganization?.id;
 
-  const { data: integration, isLoading } = useQuery({
+  const { data: integration, isPending } = useQuery({
     queryKey: QUERY_KEYS.INTEGRATIONS.detail(integrationId),
     queryFn: async () => {
       if (!organizationId) {
@@ -147,15 +147,8 @@ export default function PageClient({ integrationId }: PageClientProps) {
     enabled: !!organizationId,
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
-        <div className="w-full space-y-6 px-4 lg:px-6">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
-    );
+  if (isPending) {
+    return <GitHubIntegrationDetailSkeleton />;
   }
 
   if (!integration) {

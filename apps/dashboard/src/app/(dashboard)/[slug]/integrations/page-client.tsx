@@ -20,8 +20,10 @@ import Link from "next/link";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useState } from "react";
 import { InstalledIntegrationCard } from "@/components/integrations-card";
+import { PageContainer } from "@/components/layout/container";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import { TitleCard } from "@/components/title-card";
+import type { IntegrationConfig } from "@/lib/integrations/catalog";
 import {
 	ALL_INTEGRATIONS,
 	INPUT_SOURCES,
@@ -30,6 +32,8 @@ import {
 } from "@/lib/integrations/catalog";
 import type { IntegrationsResponse } from "@/lib/services/integrations";
 import { QUERY_KEYS } from "@/utils/query-keys";
+import type { IntegrationType } from "@/utils/schemas/integrations";
+import { IntegrationsPageSkeleton } from "./skeleton";
 
 const TAB_VALUES = ["all", "installed"] as const;
 
@@ -59,18 +63,14 @@ interface PageClientProps {
 	organizationSlug: string;
 }
 
-import { PageContainer } from "@/components/layout/container";
-import type { IntegrationConfig } from "@/lib/integrations/catalog";
-import type { IntegrationType } from "@/utils/schemas/integrations";
-
 function IntegrationCard({
 	integration,
 	activeCount,
-	isLoading,
+	isPending,
 }: {
 	integration: IntegrationConfig;
 	activeCount: number;
-	isLoading?: boolean;
+	isPending?: boolean;
 }) {
 	const { activeOrganization } = useOrganizationsContext();
 	const organizationId = activeOrganization?.id;
@@ -90,8 +90,8 @@ function IntegrationCard({
 			accentColor={integration.accentColor}
 			action={
 				<div className="flex items-center gap-1.5 sm:gap-2">
-					{isLoading && <Skeleton className="h-5 w-8 rounded-full" />}
-					{!isLoading && isActive && (
+					{isPending && <Skeleton className="h-5 w-8 rounded-full" />}
+					{!isPending && isActive && (
 						<Badge className="text-xs" variant="default">
 							{activeCount}
 						</Badge>
@@ -181,7 +181,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 		parseAsStringLiteral(TAB_VALUES).withDefault("all"),
 	);
 
-	const { data, isLoading, refetch } = useQuery<IntegrationsResponse>({
+	const { data, isPending, refetch } = useQuery<IntegrationsResponse>({
 		queryKey: QUERY_KEYS.INTEGRATIONS.all(organizationId ?? ""),
 		queryFn: async () => {
 			if (!organizationId) {
@@ -263,7 +263,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 												integrationsByType?.[integration.id]?.length || 0
 											}
 											integration={integration}
-											isLoading={isLoading}
+											isPending={isPending}
 											key={integration.id}
 										/>
 									))}
@@ -282,7 +282,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 												integrationsByType?.[integration.id]?.length || 0
 											}
 											integration={integration}
-											isLoading={isLoading}
+											isPending={isPending}
 											key={integration.id}
 										/>
 									))}
@@ -293,12 +293,8 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 
 					<TabsContent value="installed">
 						<div className="space-y-8 pt-4">
-							{isLoading ? (
-								<div className="flex flex-col items-center justify-center py-12 text-center">
-									<p className="text-muted-foreground">
-										Loading installed integrations...
-									</p>
-								</div>
+							{isPending ? (
+								<IntegrationsPageSkeleton />
 							) : (
 								(() => {
 									const inputIntegrations =

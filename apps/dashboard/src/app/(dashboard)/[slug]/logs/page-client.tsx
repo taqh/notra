@@ -3,7 +3,6 @@
 import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert, AlertDescription } from "@notra/ui/components/ui/alert";
-import { Skeleton } from "@notra/ui/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { PageContainer } from "@/components/layout/container";
@@ -12,6 +11,7 @@ import type { LogsResponse } from "@/types/webhook-logs";
 import { QUERY_KEYS } from "@/utils/query-keys";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import { LogsPageSkeleton } from "./skeleton";
 
 interface PageClientProps {
 	organizationSlug: string;
@@ -24,7 +24,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 
 	const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
-	const { data, isLoading } = useQuery({
+	const { data, isPending } = useQuery({
 		queryKey: QUERY_KEYS.WEBHOOK_LOGS.list(organizationId ?? "", page),
 		queryFn: async () => {
 			if (!organizationId) {
@@ -62,8 +62,8 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 					</AlertDescription>
 				</Alert>
 
-				{organizationId && isLoading ? (
-					<DataSkeleton />
+				{organizationId && isPending ? (
+					<LogsPageSkeleton />
 				) : (
 					<DataTable
 						columns={columns}
@@ -75,33 +75,5 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 				)}
 			</div>
 		</PageContainer>
-	);
-}
-
-export function DataSkeleton() {
-	return (
-		<div className="space-y-3">
-			<div className="overflow-hidden rounded-md border">
-				<div className="p-4">
-					{Array.from({ length: 10 }).map((_, i) => (
-						<div
-							className="flex items-center space-x-4 py-3"
-							key={`skeleton-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: This is static for loading
-								i
-							}`}
-						>
-							<Skeleton className="h-4 w-32" />
-							<Skeleton className="h-4 w-20" />
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-5 w-16" />
-							<Skeleton className="h-4 w-12" />
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-28" />
-						</div>
-					))}
-				</div>
-			</div>
-		</div>
 	);
 }

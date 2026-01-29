@@ -19,7 +19,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@notra/ui/components/ui/select";
-import { Skeleton } from "@notra/ui/components/ui/skeleton";
 import {
 	Stepper,
 	StepperIndicator,
@@ -47,6 +46,7 @@ import {
 	useBrandSettings,
 	useUpdateBrandSettings,
 } from "../../../../../lib/hooks/use-brand-analysis";
+import { BrandIdentityPageSkeleton } from "./skeleton";
 
 const AUTO_SAVE_DELAY = 1500;
 
@@ -79,11 +79,11 @@ function getStepperValue(status: string, currentStep: number): string {
 }
 
 function getModalTitle(
-	isLoadingSettings: boolean,
+	isPendingSettings: boolean,
 	isAnalyzing: boolean,
 	status: string,
 ): string {
-	if (isLoadingSettings) {
+	if (isPendingSettings) {
 		return "Loading...";
 	}
 	if (isAnalyzing) {
@@ -96,12 +96,12 @@ function getModalTitle(
 }
 
 function getModalDescription(
-	isLoadingSettings: boolean,
+	isPendingSettings: boolean,
 	isAnalyzing: boolean,
 	status: string,
 	error?: string,
 ): string {
-	if (isLoadingSettings) {
+	if (isPendingSettings) {
 		return "Checking your brand settings";
 	}
 	if (isAnalyzing) {
@@ -114,7 +114,7 @@ function getModalDescription(
 }
 
 interface ModalContentProps {
-	isLoadingSettings: boolean;
+	isPendingSettings: boolean;
 	isAnalyzing: boolean;
 	progress: { status: string; currentStep: number };
 	url: string;
@@ -122,6 +122,9 @@ interface ModalContentProps {
 	handleAnalyze: () => void;
 	isPending: boolean;
 }
+
+const sanitizeBrandUrlInput = (value: string) =>
+	value.trim().replace(/^https?:\/\//i, "");
 
 type StepIconState = "pending" | "active" | "completed";
 
@@ -147,7 +150,7 @@ function getStepIconState(
 }
 
 function ModalContent({
-	isLoadingSettings,
+	isPendingSettings,
 	isAnalyzing,
 	progress,
 	url,
@@ -155,7 +158,7 @@ function ModalContent({
 	handleAnalyze,
 	isPending,
 }: ModalContentProps) {
-	if (isLoadingSettings) {
+	if (isPendingSettings) {
 		return (
 			<div className="flex justify-center py-4">
 				<LoaderCircle className="size-8 animate-spin text-primary" />
@@ -211,7 +214,7 @@ function ModalContent({
 						className="h-10 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground"
 						disabled={isPending}
 						id="brand-url-input"
-						onChange={(e) => setUrl(e.target.value)}
+						onChange={(e) => setUrl(sanitizeBrandUrlInput(e.target.value))}
 						onKeyDown={(e) => {
 							if (e.key === "Enter" && !isPending) {
 								handleAnalyze();
@@ -587,7 +590,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 			: orgFromList;
 	const organizationId = organization?.id ?? "";
 
-	const { data, isLoading: isLoadingSettings } =
+	const { data, isPending: isPendingSettings } =
 		useBrandSettings(organizationId);
 	const { progress, startPolling } = useBrandAnalysisProgress(organizationId);
 	const analyzeMutation = useAnalyzeBrand(organizationId, startPolling);
@@ -640,51 +643,8 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 	const hasSettings = !!data?.settings;
 
 	// Show skeleton during initial loading
-	if (!organizationId || (isLoadingSettings && !data)) {
-		return (
-			<PageContainer
-				className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6"
-				variant="compact"
-			>
-				<div className="w-full space-y-6 px-4 lg:px-6">
-					<div className="space-y-1">
-						<h1 className="font-bold text-3xl tracking-tight">
-							Brand Identity
-						</h1>
-						<p className="text-muted-foreground">
-							Configure your brand identity and tone of voice
-						</p>
-					</div>
-
-					<div className="space-y-8">
-						<div className="space-y-3 border-b pb-8">
-							<Skeleton className="h-5 w-28" />
-							<Skeleton className="h-10 max-w-sm" />
-						</div>
-						<div className="space-y-3 border-b pb-8">
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-4 w-48" />
-							<Skeleton className="h-10 max-w-sm" />
-						</div>
-						<div className="space-y-3 border-b pb-8">
-							<Skeleton className="h-5 w-36" />
-							<Skeleton className="h-4 w-40" />
-							<Skeleton className="h-40 max-w-xl" />
-						</div>
-						<div className="space-y-3 border-b pb-8">
-							<Skeleton className="h-5 w-28" />
-							<Skeleton className="h-4 w-32" />
-							<Skeleton className="h-10 max-w-xs" />
-						</div>
-						<div className="space-y-3 border-b pb-8">
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-4 w-64" />
-							<Skeleton className="h-32 max-w-xl" />
-						</div>
-					</div>
-				</div>
-			</PageContainer>
-		);
+	if (!organizationId || (isPendingSettings && !data)) {
+		return <BrandIdentityPageSkeleton />;
 	}
 
 	// Show setup modal when no settings or analyzing
@@ -736,7 +696,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 									<ModalContent
 										handleAnalyze={handleAnalyze}
 										isAnalyzing={isAnalyzing}
-										isLoadingSettings={false}
+										isPendingSettings={false}
 										isPending={analyzeMutation.isPending}
 										progress={effectiveProgress}
 										setUrl={setUrl}

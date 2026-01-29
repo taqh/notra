@@ -7,6 +7,7 @@ import { PageContainer } from "@/components/layout/container";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import type { ContentType, Post } from "@/utils/schemas/content";
 import { usePosts } from "../../../../lib/hooks/use-posts";
+import { ContentPageSkeleton } from "./skeleton";
 
 interface PageClientProps {
 	organizationSlug: string;
@@ -55,43 +56,6 @@ function getPreview(markdown: string): string {
 		.replace(/`/g, "")
 		.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
 		.slice(0, 200);
-}
-
-const SKELETON_KEYS = [
-	"skeleton-1",
-	"skeleton-2",
-	"skeleton-3",
-	"skeleton-4",
-	"skeleton-5",
-	"skeleton-6",
-	"skeleton-7",
-	"skeleton-8",
-];
-
-function PostsSkeleton() {
-	return (
-		<div className="space-y-6">
-			<Skeleton className="h-7 w-64" />
-			<div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				{SKELETON_KEYS.map((key) => (
-					<div
-						className="flex flex-col rounded-[20px] border border-border/80 bg-muted/80 p-2"
-						key={key}
-					>
-						<div className="flex items-center justify-between gap-4 py-1.5 px-2">
-							<Skeleton className="h-5 w-32" />
-							<Skeleton className="h-5 w-20 rounded-full" />
-						</div>
-						<div className="rounded-[12px] border border-border/80 bg-background px-4 py-3 space-y-2">
-							<Skeleton className="h-3.5 w-full" />
-							<Skeleton className="h-3.5 w-full" />
-							<Skeleton className="h-3.5 w-2/3" />
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
 }
 
 export default function PageClient({ organizationSlug }: PageClientProps) {
@@ -144,7 +108,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 					</p>
 				</div>
 
-				{isPending && <PostsSkeleton />}
+				{isPending && <ContentPageSkeleton />}
 
 				{!isPending && allPosts.length === 0 && (
 					<div className="rounded-lg border border-dashed p-8 text-center">
@@ -178,7 +142,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 				<div className="h-10" ref={loadMoreRef}>
 					{isFetchingNextPage && (
 						<div className="flex items-center justify-center">
-							<div className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+							<Skeleton className="size-6 rounded-full" />
 						</div>
 					)}
 				</div>

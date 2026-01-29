@@ -19,7 +19,36 @@ export function usePosts(organizationId: string) {
       }
 
       const res = await fetch(
-        `/api/organizations/${organizationId}/content?${params.toString()}`
+        `/api/organizations/${organizationId}/content?${params.toString()}`,
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch content");
+      }
+
+      return res.json();
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    enabled: !!organizationId,
+  });
+}
+
+export function useTodayPosts(organizationId: string) {
+  return useInfiniteQuery({
+    queryKey: QUERY_KEYS.POSTS.today(organizationId),
+    queryFn: async ({ pageParam }): Promise<PostsResponse> => {
+      const params = new URLSearchParams({
+        limit: String(DEFAULT_LIMIT),
+        date: "today",
+      });
+
+      if (pageParam) {
+        params.set("cursor", pageParam);
+      }
+
+      const res = await fetch(
+        `/api/organizations/${organizationId}/content?${params.toString()}`,
       );
 
       if (!res.ok) {

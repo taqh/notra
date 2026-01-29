@@ -1,6 +1,5 @@
 "use client";
 
-import { Skeleton } from "@notra/ui/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { AddIntegrationDialog } from "@/components/integrations/add-integration-dialog";
 import { IntegrationCard } from "@/components/integrations/integration-card";
@@ -8,6 +7,7 @@ import { PageContainer } from "@/components/layout/container";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import type { GitHubIntegration } from "@/types/integrations";
 import { QUERY_KEYS } from "@/utils/query-keys";
+import { GitHubIntegrationsPageSkeleton } from "./skeleton";
 
 interface IntegrationsResponse {
 	integrations: Array<GitHubIntegration & { type: string }>;
@@ -24,7 +24,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 
 	const {
 		data: response,
-		isLoading,
+		isPending,
 		refetch,
 	} = useQuery({
 		queryKey: QUERY_KEYS.INTEGRATIONS.all(organization?.id ?? ""),
@@ -72,14 +72,9 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 				</div>
 
 				<div>
-					{isLoading ? (
-						<div className="space-y-4">
-							<Skeleton className="h-32 w-full" />
-							<Skeleton className="h-32 w-full" />
-						</div>
-					) : null}
+					{isPending ? <GitHubIntegrationsPageSkeleton /> : null}
 
-					{!isLoading && (!integrations || integrations.length === 0) ? (
+					{!isPending && (!integrations || integrations.length === 0) ? (
 						<div className="rounded-xl border border-dashed p-12 text-center">
 							<h3 className="font-medium text-lg">No integrations yet</h3>
 							<p className="text-muted-foreground text-sm">
@@ -88,7 +83,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 						</div>
 					) : null}
 
-					{!isLoading && integrations && integrations.length > 0 ? (
+					{!isPending && integrations && integrations.length > 0 ? (
 						<div className="grid gap-4">
 							{integrations.map((integration) => (
 								<IntegrationCard

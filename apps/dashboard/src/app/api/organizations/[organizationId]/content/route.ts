@@ -1,4 +1,4 @@
-import { and, desc, eq, type InferSelectModel, lt, or } from "drizzle-orm";
+import { and, desc, eq, type InferSelectModel, gte, lt, or } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { withOrganizationAuth } from "@/lib/auth/organization";
 import { db } from "@notra/db/drizzle";
@@ -32,6 +32,32 @@ function decodeCursor(cursor: string): CursorData | null {
   }
 }
 
+function getDateRange(dateParam: string | null): {
+  startDate: Date;
+  endDate: Date;
+} | null {
+  if (!dateParam) return null;
+
+  const baseDate = dateParam === "today" ? new Date() : new Date(dateParam);
+
+  if (Number.isNaN(baseDate.getTime())) {
+    return null;
+  }
+
+  const startDate = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+  );
+  const endDate = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate() + 1,
+  );
+
+  return { startDate, endDate };
+}
+
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
     const { organizationId } = await params;
@@ -44,12 +70,27 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const { searchParams } = new URL(request.url);
     const cursor = searchParams.get("cursor");
     const limitParam = searchParams.get("limit");
+    const dateParam = searchParams.get("date");
     const parsedLimit = limitParam
       ? Number.parseInt(limitParam, 10)
       : DEFAULT_LIMIT;
     const limit = Number.isNaN(parsedLimit)
       ? DEFAULT_LIMIT
       : Math.min(Math.max(1, parsedLimit), MAX_LIMIT);
+
+    const dateRange = getDateRange(dateParam);
+
+    if (dateParam && !dateRange) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
+
+    const baseFilters = [eq(posts.organizationId, organizationId)];
+    if (dateRange) {
+      baseFilters.push(
+        gte(posts.createdAt, dateRange.startDate),
+        lt(posts.createdAt, dateRange.endDate),
+      );
+    }
 
     let results: Post[];
 
@@ -68,18 +109,18 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       // Use compound cursor: items with earlier timestamp OR same timestamp with lexicographically smaller id
       results = await db.query.posts.findMany({
         where: and(
-          eq(posts.organizationId, organizationId),
+          ...baseFilters,
           or(
             lt(posts.createdAt, cursorDate),
-            and(eq(posts.createdAt, cursorDate), lt(posts.id, cursorData.id))
-          )
+            and(eq(posts.createdAt, cursorDate), lt(posts.id, cursorData.id)),
+          ),
         ),
         orderBy: [desc(posts.createdAt), desc(posts.id)],
         limit: limit + 1,
       });
     } else {
       results = await db.query.posts.findMany({
-        where: eq(posts.organizationId, organizationId),
+        where: and(...baseFilters),
         orderBy: [desc(posts.createdAt), desc(posts.id)],
         limit: limit + 1,
       });
@@ -108,7 +149,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch posts" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

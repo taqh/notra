@@ -1,7 +1,12 @@
 "use client";
 
-import { AtIcon, Cancel01Icon, TextSelectionIcon } from "@hugeicons/core-free-icons";
+import {
+  AtIcon,
+  Cancel01Icon,
+  TextSelectionIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert, AlertDescription } from "@notra/ui/components/ui/alert";
 import { Button } from "@notra/ui/components/ui/button";
 import {
   Card,
@@ -31,9 +36,11 @@ import {
   TooltipTrigger,
 } from "@notra/ui/components/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
+import { useCustomer } from "autumn-js/react";
 import Link from "next/link";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { FEATURES } from "@/lib/billing/constants";
 import { ALL_INTEGRATIONS } from "@/lib/integrations/catalog";
 import type { GitHubRepository } from "@/types/integrations";
 import type { IntegrationsResponse } from "@/lib/services/integrations";
@@ -65,18 +72,70 @@ type ChatInputProps = {
   context?: ContextItem[];
   onAddContext?: (item: ContextItem) => void;
   onRemoveContext?: (item: ContextItem) => void;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  error?: string | null;
+  onClearError?: () => void;
 };
 
-const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSelection, organizationSlug, organizationId, context = [], onAddContext, onRemoveContext }: ChatInputProps) => {
+const ChatInput = ({
+  onSend,
+  isLoading = false,
+  statusText,
+  selection,
+  onClearSelection,
+  organizationSlug,
+  organizationId,
+  context = [],
+  onAddContext,
+  onRemoveContext,
+  value: controlledValue,
+  onValueChange,
+  error: externalError,
+  onClearError,
+}: ChatInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [value, setValue] = useState("");
+  const [internalValue, setInternalValue] = useState("");
+  const [internalError, setInternalError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const { check, customer } = useCustomer();
+
+  const checkResult = useMemo(() => {
+    if (!customer) return null;
+    return check({
+      featureId: FEATURES.CHAT_MESSAGES,
+      requiredBalance: 1,
+    }).data;
+  }, [check, customer]);
+  const remainingChatCredits =
+    typeof checkResult?.balance === "number" ? checkResult.balance : null;
+  const shouldShowLowCredits =
+    remainingChatCredits !== null &&
+    remainingChatCredits > 0 &&
+    remainingChatCredits <= 10;
+  const isUsageBlocked = checkResult ? checkResult.allowed === false : false;
+  const limitMessage = "No chat credits left.";
+  const usageLimitError =
+    externalError ?? internalError ?? (isUsageBlocked ? limitMessage : null);
+  const clearError = useCallback(() => {
+    setInternalError(null);
+    onClearError?.();
+  }, [onClearError]);
+
+  // Support both controlled and uncontrolled modes
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : internalValue;
+  const setValue = isControlled
+    ? (onValueChange ?? (() => {}))
+    : setInternalValue;
 
   // Fetch GitHub integrations
   const { data: integrationsData } = useQuery<IntegrationsResponse>({
     queryKey: QUERY_KEYS.INTEGRATIONS.all(organizationId ?? ""),
     queryFn: async () => {
-      const response = await fetch(`/api/organizations/${organizationId}/integrations`);
+      const response = await fetch(
+        `/api/organizations/${organizationId}/integrations`,
+      );
       if (!response.ok) throw new Error("Failed to fetch integrations");
       return response.json();
     },
@@ -99,26 +158,72 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
   const isRepoInContext = useCallback(
     (repo: GitHubRepository & { integrationId: string }) =>
       context.some(
-        (c) => c.type === "github-repo" && c.owner === repo.owner && c.repo === repo.repo
+        (c) =>
+          c.type === "github-repo" &&
+          c.owner === repo.owner &&
+          c.repo === repo.repo,
       ),
-    [context]
+    [context],
   );
   const resizeTextarea = useCallback(() => {
     const element = textareaRef.current;
     if (!element) return;
     element.style.height = "0";
     const maxHeightRem = 12.5;
-    const maxHeightPx = maxHeightRem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const maxHeightPx =
+      maxHeightRem *
+      parseFloat(getComputedStyle(document.documentElement).fontSize);
     element.style.height = `${Math.min(element.scrollHeight / parseFloat(getComputedStyle(document.documentElement).fontSize), maxHeightRem)}rem`;
-    element.style.overflowY = element.scrollHeight > maxHeightPx ? "auto" : "hidden";
+    element.style.overflowY =
+      element.scrollHeight > maxHeightPx ? "auto" : "hidden";
   }, []);
-  const handleSend = useCallback(() => {
+
+  // Resize textarea when controlled value changes
+  useEffect(() => {
+    if (isControlled) {
+      requestAnimationFrame(resizeTextarea);
+    }
+  }, [isControlled, resizeTextarea]);
+
+  const handleSend = useCallback(async () => {
     const trimmed = value.trim();
     if (!trimmed || isLoading) return;
+
+    clearError();
+
+    if (isUsageBlocked) {
+      setInternalError(limitMessage);
+      return;
+    }
+
+    // Only check billing if customer data is available (Autumn is configured)
+    if (customer) {
+      const { data: checkResult } = check({
+        featureId: FEATURES.CHAT_MESSAGES,
+        requiredBalance: 1,
+      });
+
+      // Only block if we explicitly got allowed: false (not if check failed)
+      if (checkResult?.allowed === false) {
+        setInternalError(limitMessage);
+        return;
+      }
+    }
+
     onSend?.(trimmed);
     setValue("");
     requestAnimationFrame(resizeTextarea);
-  }, [onSend, resizeTextarea, value, isLoading]);
+  }, [
+    onSend,
+    resizeTextarea,
+    value,
+    isLoading,
+    check,
+    customer,
+    isUsageBlocked,
+    clearError,
+    setValue,
+  ]);
 
   useHotkeys(
     "enter",
@@ -142,7 +247,25 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
         <span>Chat input</span>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="rounded-[14px] border border-border bg-background p-0.5 shadow-sm" tabIndex={-1}>
+        <div
+          className="rounded-[14px] border border-border bg-background p-0.5 shadow-sm"
+          tabIndex={-1}
+        >
+          {usageLimitError && (
+            <Alert variant="destructive" className="mx-2 mt-2 mb-1">
+              <AlertDescription className="flex flex-wrap items-center gap-1 text-sm break-words">
+                <span>{usageLimitError}</span>
+                {organizationSlug && (
+                  <Link
+                    href={`/${organizationSlug}/billing/plans`}
+                    className="font-medium underline underline-offset-2"
+                  >
+                    Upgrade
+                  </Link>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
           {isLoading && statusText && (
             <div className="flex items-start gap-2 px-3.5 pt-2 pb-1">
               <svg
@@ -152,10 +275,23 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                 viewBox="0 0 24 24"
                 aria-hidden="true"
               >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
-              <p className="text-sm text-muted-foreground leading-5">{statusText}</p>
+              <p className="text-sm text-muted-foreground leading-5">
+                {statusText}
+              </p>
             </div>
           )}
           {(context.length > 0 || selection) && (
@@ -166,7 +302,9 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                   className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs text-foreground"
                 >
                   <Github className="size-3.5" />
-                  <span className="font-medium">{item.owner}/{item.repo}</span>
+                  <span className="font-medium">
+                    {item.owner}/{item.repo}
+                  </span>
                   <button
                     type="button"
                     onClick={() => onRemoveContext?.(item)}
@@ -184,9 +322,13 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                       <div className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs text-foreground" />
                     }
                   >
-                    <HugeiconsIcon icon={TextSelectionIcon} className="size-3.5 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={TextSelectionIcon}
+                      className="size-3.5 text-muted-foreground"
+                    />
                     <span className="font-medium">
-                      L{selection.startLine}:{selection.startChar} → L{selection.endLine}:{selection.endChar}
+                      L{selection.startLine}:{selection.startChar} → L
+                      {selection.endLine}:{selection.endChar}
                     </span>
                     <button
                       type="button"
@@ -201,10 +343,16 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                     <div className="space-y-1">
                       <p className="font-medium">Selected Text</p>
                       <p className="text-xs opacity-70">
-                        From line {selection.startLine}, character {selection.startChar} to line {selection.endLine}, character {selection.endChar}
+                        From line {selection.startLine}, character{" "}
+                        {selection.startChar} to line {selection.endLine},
+                        character {selection.endChar}
                       </p>
                       <p className="text-xs opacity-80 line-clamp-3 whitespace-pre-wrap break-all">
-                        "{selection.text.length > 150 ? selection.text.slice(0, 150) + "..." : selection.text}"
+                        "
+                        {selection.text.length > 150
+                          ? selection.text.slice(0, 150) + "..."
+                          : selection.text}
+                        "
                       </p>
                     </div>
                   </TooltipContent>
@@ -218,8 +366,10 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                 <Textarea
                   className="min-h-8 max-h-[12.5rem] w-full resize-none border-0 bg-transparent py-0 pl-3.5 pr-2 text-sm text-foreground leading-8 whitespace-pre-wrap outline-none shadow-none ring-0 caret-foreground focus-visible:border-transparent focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label="Send a message"
-                  disabled={isLoading}
-                  placeholder={isLoading ? "AI is working..." : "Send a message..."}
+                  disabled={isLoading || isUsageBlocked}
+                  placeholder={
+                    isLoading ? "AI is working..." : "Send a message..."
+                  }
                   onBlur={() => setIsFocused(false)}
                   onChange={(event) => {
                     setValue(event.target.value);
@@ -233,6 +383,11 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
               </div>
             </div>
           </div>
+          {shouldShowLowCredits && (
+            <div className="px-3 pb-1 text-xs text-muted-foreground">
+              {remainingChatCredits} chat messages left
+            </div>
+          )}
           <CardFooter className="flex items-center justify-between overflow-hidden p-2">
             <div className="flex items-center gap-1 sm:gap-2">
               <DropdownMenu>
@@ -280,14 +435,18 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                             <span className="size-4 shrink-0 text-foreground [&_svg]:size-4">
                               {integration.icon}
                             </span>
-                            <span className="text-foreground">{integration.name}</span>
+                            <span className="text-foreground">
+                              {integration.name}
+                            </span>
                             <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400">
                               {enabledRepos.length}
                             </span>
                           </DropdownMenuSubTrigger>
                           <DropdownMenuSubContent className="max-h-64 overflow-y-auto">
                             <DropdownMenuGroup>
-                              <DropdownMenuLabel>Select Repository</DropdownMenuLabel>
+                              <DropdownMenuLabel>
+                                Select Repository
+                              </DropdownMenuLabel>
                             </DropdownMenuGroup>
                             {enabledRepos.map((repo) => {
                               const inContext = isRepoInContext(repo);
@@ -313,7 +472,9 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                                   }}
                                 >
                                   <Github className="size-4" />
-                                  <span className="truncate">{repo.owner}/{repo.repo}</span>
+                                  <span className="truncate">
+                                    {repo.owner}/{repo.repo}
+                                  </span>
                                   {inContext && (
                                     <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400">
                                       Added
@@ -326,7 +487,11 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                  render={<Link href={`/${organizationSlug}/integrations/github`} />}
+                                  render={
+                                    <Link
+                                      href={`/${organizationSlug}/integrations/github`}
+                                    />
+                                  }
                                 >
                                   Manage repositories
                                 </DropdownMenuItem>
@@ -342,12 +507,18 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                       return (
                         <DropdownMenuItem
                           key={integration.id}
-                          render={<Link href={`/${organizationSlug}/integrations/github`} />}
+                          render={
+                            <Link
+                              href={`/${organizationSlug}/integrations/github`}
+                            />
+                          }
                         >
                           <span className="size-4 shrink-0 text-foreground [&_svg]:size-4">
                             {integration.icon}
                           </span>
-                          <span className="text-foreground">{integration.name}</span>
+                          <span className="text-foreground">
+                            {integration.name}
+                          </span>
                           <span className="ml-auto text-xs text-muted-foreground">
                             Setup
                           </span>
@@ -365,7 +536,9 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                         <span className="size-4 shrink-0 text-foreground [&_svg]:size-4">
                           {integration.icon}
                         </span>
-                        <span className="text-foreground">{integration.name}</span>
+                        <span className="text-foreground">
+                          {integration.name}
+                        </span>
                         <span className="ml-auto text-xs text-muted-foreground">
                           Soon
                         </span>
@@ -376,7 +549,9 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        render={<Link href={`/${organizationSlug}/integrations`} />}
+                        render={
+                          <Link href={`/${organizationSlug}/integrations`} />
+                        }
                       >
                         Manage integrations
                       </DropdownMenuItem>
@@ -395,7 +570,7 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                     size="sm"
                     variant="outline"
                     onClick={handleSend}
-                    disabled={isLoading}
+                    disabled={isLoading || isUsageBlocked}
                   />
                 }
               >
@@ -436,7 +611,9 @@ const ChatInput = ({ onSend, isLoading = false, statusText, selection, onClearSe
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {isLoading ? "AI is thinking..." : "Enter to send. Shift+Enter for a new line."}
+                {isLoading
+                  ? "AI is thinking..."
+                  : "Enter to send. Shift+Enter for a new line."}
               </TooltipContent>
             </Tooltip>
           </CardFooter>

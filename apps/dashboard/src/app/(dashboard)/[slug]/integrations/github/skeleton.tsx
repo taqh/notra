@@ -1,0 +1,28 @@
+"use client";
+
+import { Skeleton } from "@notra/ui/components/ui/skeleton";
+import { useId } from "react";
+
+export function GitHubIntegrationsPageSkeleton() {
+  const id = useId();
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 2 }).map((_, i) => (
+        <div
+          className="rounded-[20px] border border-border/80 bg-muted/80 p-2"
+          key={`${id}-card-${i}`}
+        >
+          <div className="py-1.5 px-2">
+            <Skeleton className="h-6 w-32" />
+          </div>
+          <div className="rounded-[12px] border border-border/80 bg-background px-4 py-3 space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -3,7 +3,6 @@
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@notra/ui/components/ui/button";
-import { Skeleton } from "@notra/ui/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -22,7 +21,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-
 import { PageContainer } from "@/components/layout/container";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import type { Trigger, TriggerSourceType } from "@/types/triggers";
@@ -31,6 +29,7 @@ import { QUERY_KEYS } from "@/utils/query-keys";
 import { AddTriggerDialog } from "../../triggers/trigger-dialog";
 import { TriggerRowActions } from "../_components/trigger-row-actions";
 import { TriggerStatusBadge } from "../_components/trigger-status-badge";
+import { SchedulePageSkeleton } from "./skeleton";
 
 const CRON_SOURCE_TYPES: TriggerSourceType[] = ["cron"];
 
@@ -66,7 +65,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 	const queryClient = useQueryClient();
 	const [activeTab, setActiveTab] = useState<"active" | "paused">("active");
 
-	const { data, isLoading } = useQuery({
+	const { data, isPending } = useQuery({
 		queryKey: QUERY_KEYS.AUTOMATION.schedules(organizationId ?? ""),
 		queryFn: async () => {
 			if (!organizationId) {
@@ -219,11 +218,8 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 					/>
 				</div>
 
-				{isLoading ? (
-					<div className="space-y-4">
-						<Skeleton className="h-10 w-48" />
-						<Skeleton className="h-64 w-full" />
-					</div>
+				{isPending ? (
+					<SchedulePageSkeleton />
 				) : scheduleTriggers.length === 0 ? (
 					<div className="rounded-2xl border border-dashed p-12 text-center">
 						<h3 className="font-semibold text-lg">No schedules yet</h3>

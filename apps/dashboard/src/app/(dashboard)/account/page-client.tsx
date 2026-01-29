@@ -7,7 +7,6 @@ import {
 	ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-
 import {
 	Avatar,
 	AvatarFallback,
@@ -16,7 +15,6 @@ import {
 import { Button } from "@notra/ui/components/ui/button";
 import { Input } from "@notra/ui/components/ui/input";
 import { Label } from "@notra/ui/components/ui/label";
-import { Skeleton } from "@notra/ui/components/ui/skeleton";
 import { Github } from "@notra/ui/components/ui/svgs/github";
 import { Google } from "@notra/ui/components/ui/svgs/google";
 import { useForm } from "@tanstack/react-form";
@@ -30,6 +28,7 @@ import { PageContainer } from "@/components/layout/container";
 import { DeleteAccountSection } from "@/components/settings/delete-account";
 import { TitleCard } from "@/components/title-card";
 import { authClient } from "@/lib/auth/client";
+import { AccountPageSkeleton } from "./skeleton";
 
 const nameSchema = z.string().trim().min(1, "Name cannot be empty");
 
@@ -609,76 +608,5 @@ function ConnectedAccountsSection({
 				)}
 			</div>
 		</TitleCard>
-	);
-}
-
-function AccountPageSkeleton() {
-	return (
-		<PageContainer
-			className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6"
-			variant="compact"
-		>
-			<div className="w-full space-y-6 px-4 lg:px-6">
-				<div className="space-y-1">
-					<h1 className="font-bold text-3xl tracking-tight">Account</h1>
-					<p className="text-muted-foreground">
-						Manage your profile, preferences, and account settings
-					</p>
-				</div>
-
-				<div className="grid gap-6 lg:grid-cols-2">
-					<div className="rounded-[20px] border border-border/80 bg-muted/80 p-2">
-						<div className="py-1.5 pr-2 pl-2">
-							<Skeleton className="h-6 w-28" />
-						</div>
-						<div className="rounded-[12px] border border-border/80 bg-background px-4 py-3">
-							<div className="space-y-6">
-								<div className="flex items-center gap-4">
-									<Skeleton className="size-16 rounded-lg" />
-									<div className="space-y-2">
-										<Skeleton className="h-4 w-24" />
-										<Skeleton className="h-3 w-48" />
-									</div>
-								</div>
-								<div className="space-y-2">
-									<Skeleton className="h-4 w-20" />
-									<Skeleton className="h-10 w-full" />
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div className="rounded-[20px] border border-border/80 bg-muted/80 p-2">
-						<div className="py-1.5 pr-2 pl-2">
-							<Skeleton className="h-6 w-28" />
-						</div>
-						<div className="rounded-[12px] border border-border/80 bg-background px-4 py-3">
-							<div className="space-y-6">
-								<div className="space-y-2">
-									<Skeleton className="h-4 w-16" />
-									<Skeleton className="h-10 w-full" />
-									<Skeleton className="h-3 w-64" />
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div className="rounded-[20px] border border-border/80 bg-muted/80 p-2 lg:col-span-2">
-						<div className="py-1.5 pr-2 pl-2">
-							<Skeleton className="h-6 w-40" />
-						</div>
-						<div className="rounded-[12px] border border-border/80 bg-background px-4 py-3">
-							<div className="space-y-4">
-								<Skeleton className="h-4 w-64" />
-								<div className="space-y-3">
-									<Skeleton className="h-20 w-full rounded-lg" />
-									<Skeleton className="h-20 w-full rounded-lg" />
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</PageContainer>
 	);
 }

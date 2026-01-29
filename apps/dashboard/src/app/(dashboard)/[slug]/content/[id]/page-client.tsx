@@ -2,7 +2,9 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { useCustomer } from "autumn-js/react";
 import remend from "remend";
+import { ContentDetailSkeleton } from "./skeleton";
 import { Badge } from "@notra/ui/components/ui/badge";
 import { Button } from "@notra/ui/components/ui/button";
 import { useSidebar } from "@notra/ui/components/ui/sidebar";
@@ -16,7 +18,10 @@ import Link from "next/link";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import ChatInput, { type ContextItem, type TextSelection } from "@/components/chat-input";
+import ChatInput, {
+  type ContextItem,
+  type TextSelection,
+} from "@/components/chat-input";
 import { CONTENT_TYPE_LABELS } from "@/components/content/content-card";
 import { DiffView } from "@/components/content/diff-view";
 import { LexicalEditor } from "@/components/content/editor/lexical-editor";
@@ -61,11 +66,12 @@ export default function PageClient({
 }: PageClientProps) {
   const [view, setView] = useQueryState(
     "view",
-    parseAsStringLiteral(VIEW_OPTIONS).withDefault("rendered")
+    parseAsStringLiteral(VIEW_OPTIONS).withDefault("rendered"),
   );
 
   const { state: sidebarState } = useSidebar();
-  const { data, isLoading, error } = useContent(organizationId, contentId);
+  const { data, isPending, error } = useContent(organizationId, contentId);
+  const { refetch: refetchCustomer } = useCustomer();
 
   const [editedMarkdown, setEditedMarkdown] = useState<string | null>(null);
   const [originalMarkdown, setOriginalMarkdown] = useState("");
@@ -110,7 +116,7 @@ export default function PageClient({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ markdown: editedMarkdown }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -169,7 +175,7 @@ export default function PageClient({
             </Button>
           </div>
         ),
-        { duration: Number.POSITIVE_INFINITY, position: "bottom-right" }
+        { duration: Number.POSITIVE_INFINITY, position: "bottom-right" },
       );
     } else if (!hasChanges && saveToastIdRef.current) {
       toast.dismiss(saveToastIdRef.current);
@@ -194,7 +200,14 @@ export default function PageClient({
   const handleAddContext = useCallback((item: ContextItem) => {
     setContext((prev) => {
       // Check if already in context
-      if (prev.some((c) => c.type === item.type && c.owner === item.owner && c.repo === item.repo)) {
+      if (
+        prev.some(
+          (c) =>
+            c.type === item.type &&
+            c.owner === item.owner &&
+            c.repo === item.repo,
+        )
+      ) {
         return prev;
       }
       return [...prev, item];
@@ -204,8 +217,13 @@ export default function PageClient({
   const handleRemoveContext = useCallback((item: ContextItem) => {
     setContext((prev) =>
       prev.filter(
-        (c) => !(c.type === item.type && c.owner === item.owner && c.repo === item.repo)
-      )
+        (c) =>
+          !(
+            c.type === item.type &&
+            c.owner === item.owner &&
+            c.repo === item.repo
+          ),
+      ),
     );
   }, []);
 
@@ -261,6 +279,8 @@ export default function PageClient({
   selectionRef.current = selection;
   contextRef.current = context;
 
+  const [chatError, setChatError] = useState<string | null>(null);
+
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: `/api/organizations/${organizationId}/content/${contentId}/chat`,
@@ -272,9 +292,35 @@ export default function PageClient({
     }),
     onFinish: () => {
       clearSelection();
+      refetchCustomer();
     },
     onError: (err) => {
       console.error("Error editing content:", err);
+
+      const errorMessage = err.message || String(err);
+
+      if (
+        errorMessage.includes("USAGE_LIMIT_REACHED") ||
+        errorMessage.includes("Usage limit reached")
+      ) {
+        setChatError(
+          "You've used all your chat messages this month. Upgrade for more.",
+        );
+        return;
+      }
+
+      try {
+        const errorData = JSON.parse(errorMessage);
+        if (errorData.code === "USAGE_LIMIT_REACHED") {
+          setChatError(
+            "You've used all your chat messages this month. Upgrade for more.",
+          );
+          return;
+        }
+      } catch {
+        // Not a JSON error, fall through
+      }
+
       toast.error("Failed to edit content");
     },
   });
@@ -301,7 +347,10 @@ export default function PageClient({
             const toolPart = part as { state: string };
             // Extract tool name from type like "tool-getMarkdown" -> "getMarkdown"
             const toolName = part.type.replace("tool-", "");
-            if (toolPart.state === "input-streaming" || toolPart.state === "input-available") {
+            if (
+              toolPart.state === "input-streaming" ||
+              toolPart.state === "input-available"
+            ) {
               return toolNames[toolName] || `Running ${toolName}...`;
             }
           }
@@ -323,7 +372,7 @@ export default function PageClient({
             const toolPart = part as {
               toolCallId: string;
               state: string;
-              output?: { updatedMarkdown?: string }
+              output?: { updatedMarkdown?: string };
             };
 
             // Skip if already processed
@@ -338,7 +387,9 @@ export default function PageClient({
               processedToolCallsRef.current.add(toolPart.toolCallId);
               // Use remend to fix any incomplete markdown syntax
               const fixedMarkdown = remend(toolPart.output.updatedMarkdown);
-              console.log(`[Tool] editMarkdown result applied, toolCallId=${toolPart.toolCallId}`);
+              console.log(
+                `[Tool] editMarkdown result applied, toolCallId=${toolPart.toolCallId}`,
+              );
               setEditedMarkdown(fixedMarkdown);
               editorRef.current?.setMarkdown(fixedMarkdown);
             }
@@ -352,19 +403,11 @@ export default function PageClient({
     async (instruction: string) => {
       await sendMessage({ text: instruction });
     },
-    [sendMessage]
+    [sendMessage],
   );
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
-        <div className="mx-auto w-full max-w-5xl space-y-6 px-4 lg:px-6">
-          <div className="rounded-xl border border-dashed p-12 text-center">
-            <p className="text-muted-foreground text-sm">Loading content...</p>
-          </div>
-        </div>
-      </div>
-    );
+  if (isPending) {
+    return <ContentDetailSkeleton />;
   }
 
   if (error || !data?.content) {
@@ -492,7 +535,9 @@ export default function PageClient({
         <div className="h-24" />
       </div>
 
-      <div className={`fixed bottom-0 left-0 right-0 mx-auto w-full max-w-2xl px-4 pb-4 ${sidebarState === "collapsed" ? "md:left-14" : "md:left-64"}`}>
+      <div
+        className={`fixed bottom-0 left-0 right-0 mx-auto w-full max-w-2xl px-4 pb-4 ${sidebarState === "collapsed" ? "md:left-14" : "md:left-64"}`}
+      >
         <ChatInput
           onSend={handleAiEdit}
           isLoading={status === "streaming" || status === "submitted"}
@@ -504,6 +549,8 @@ export default function PageClient({
           context={context}
           onAddContext={handleAddContext}
           onRemoveContext={handleRemoveContext}
+          error={chatError}
+          onClearError={() => setChatError(null)}
         />
       </div>
     </div>

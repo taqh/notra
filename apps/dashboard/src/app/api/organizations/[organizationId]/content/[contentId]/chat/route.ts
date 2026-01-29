@@ -1,20 +1,14 @@
-import { withSupermemory } from "@supermemory/tools/ai-sdk";
-import {
-  convertToModelMessages,
-  streamText,
-  stepCountIs,
-} from "ai";
+import { Autumn } from "autumn-js";
+import { nanoid } from "nanoid";
 import type { NextRequest } from "next/server";
-import { getContentEditorChatPrompt } from "@/lib/ai/prompts/content-editor";
-import { createMarkdownTools } from "@/lib/ai/tools/edit-markdown";
-import {
-  getSkillByName,
-  listAvailableSkills,
-} from "@/lib/ai/tools/skills";
-import { withOrganizationAuth } from "@/lib/auth/organization";
-import { openrouter } from "@/lib/openrouter";
-import { chatRequestSchema } from "@/utils/schemas/content";
 import { NextResponse } from "next/server";
+import { orchestrateChat } from "@/lib/ai/orchestration";
+import { withOrganizationAuth } from "@/lib/auth/organization";
+import { FEATURES } from "@/lib/billing/constants";
+import { chatRequestSchema } from "@/utils/schemas/content";
+
+const AUTUMN_SECRET_KEY = process.env.AUTUMN_SECRET_KEY;
+const autumn = AUTUMN_SECRET_KEY ? new Autumn() : null;
 
 interface RouteContext {
   params: Promise<{ organizationId: string; contentId: string }>;
@@ -23,6 +17,8 @@ interface RouteContext {
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
+  const requestId = nanoid(10);
+
   try {
     const { organizationId } = await params;
 
@@ -30,6 +26,46 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     if (!auth.success) {
       return auth.response;
+    }
+
+    // Check billing if Autumn is configured
+    if (autumn) {
+      console.log("[Autumn] Checking feature access:", {
+        requestId,
+        customerId: organizationId,
+        featureId: FEATURES.CHAT_MESSAGES,
+      });
+
+      const { data: checkData, error: checkError } = await autumn.check({
+        customer_id: organizationId,
+        feature_id: FEATURES.CHAT_MESSAGES,
+      });
+
+      if (checkError) {
+        console.error("[Autumn] Check error:", { requestId, customerId: organizationId, error: checkError });
+        return NextResponse.json(
+          { error: "Failed to check usage limits", code: "BILLING_ERROR" },
+          { status: 500 }
+        );
+      }
+
+      if (!checkData?.allowed) {
+        console.log("[Autumn] Usage limit reached:", {
+          requestId,
+          customerId: organizationId,
+          balance: checkData?.balance ?? 0,
+        });
+        return NextResponse.json(
+          {
+            error: "Usage limit reached",
+            code: "USAGE_LIMIT_REACHED",
+            balance: checkData?.balance ?? 0,
+          },
+          { status: 403 }
+        );
+      }
+    } else {
+      console.log("[Autumn] Skipping billing check - AUTUMN_SECRET_KEY not configured", { requestId });
     }
 
     const body = await request.json();
@@ -44,34 +80,46 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     const { messages, currentMarkdown, selection, context } = parseResult.data;
 
-    const modelWithMemory = withSupermemory(
-      openrouter("anthropic/claude-sonnet-4.5"),
-      organizationId
-    );
+    let tracked = false;
+    if (autumn) {
+      const { error: trackError } = await autumn.track({
+        customer_id: organizationId,
+        feature_id: FEATURES.CHAT_MESSAGES,
+        value: 1,
+      });
 
-    const { getMarkdown, editMarkdown } = createMarkdownTools({
-      currentMarkdown,
-      onUpdate: () => {},
-    });
+      if (trackError) {
+        console.error("[Autumn] Track error:", { requestId, customerId: organizationId, error: trackError });
+      }
+      tracked = !trackError;
+    }
 
-    const result = streamText({
-      model: modelWithMemory,
-      system: getContentEditorChatPrompt({
+    try {
+      const { stream, routingDecision } = await orchestrateChat({
+        organizationId,
+        messages,
+        currentMarkdown,
         selection,
-        repoContext: context,
-      }),
-      messages: await convertToModelMessages(messages),
-      tools: {
-        getMarkdown,
-        editMarkdown,
-        listAvailableSkills: listAvailableSkills(),
-        getSkillByName: getSkillByName(),
-      },
-      stopWhen: stepCountIs(1),
-    });
+        context,
+        maxSteps: 1,
+      });
 
-    return result.toUIMessageStreamResponse();
-  } catch (_e) {
+      console.log("[Content Chat] Routing decision:", { requestId, decision: routingDecision });
+
+      return stream.toUIMessageStreamResponse();
+    } catch (orchestrationError) {
+      if (tracked && autumn) {
+        await autumn.track({
+          customer_id: organizationId,
+          feature_id: FEATURES.CHAT_MESSAGES,
+          value: -1,
+        });
+        console.log("[Autumn] Usage compensated after orchestration failure:", { requestId });
+      }
+      throw orchestrationError;
+    }
+  } catch (e) {
+    console.error("[Content Chat] Error:", { requestId, error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json(
       { error: "Failed to process chat request" },
       { status: 500 }
