@@ -109,5 +109,5 @@ function getLastUserMessage(messages: UIMessage[]): string {
 
 export * from "./types";
 export { validateIntegrations, hasEnabledGitHubIntegration } from "./integration-validator";
-export { routeAndSelectModel, routeMessage, selectModel } from "./router";
+export { routeAndSelectModel, routeMessage, selectModel, MODELS } from "./router";
 export { buildToolSet } from "./tool-registry";

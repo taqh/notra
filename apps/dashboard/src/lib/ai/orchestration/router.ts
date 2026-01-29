@@ -4,10 +4,10 @@ import { openrouter } from "@/lib/openrouter";
 import { routingDecisionSchema } from "./schemas";
 import type { RoutingDecision, RoutingResult } from "./types";
 
-const MODELS = {
-  router: "openai/gpt-oss-120b",
+export const MODELS = {
+  router: "openai/gpt-oss-120b", // Only for routing decisions, no supermemory
   simple: "openai/gpt-5.1",
-  complex: "anthropic/claude-sonnet-4.5",
+  complex: "moonshotai/kimi-k2.5",
 } as const;
 
 export async function routeMessage(
