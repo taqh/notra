@@ -35,7 +35,7 @@ export function LoginForm({
 	const [isAuthLoading, setIsAuthLoading] = useState(false);
 	const lastMethod = authClient.getLastUsedLoginMethod();
 
-	const callbackURL = returnTo || "/callback";
+	const callbackURL = returnTo ? `/callback?returnTo=${encodeURIComponent(returnTo)}` : "/callback";
 
 	async function handleSocialLogin(provider: "google" | "github") {
 		if (isAuthLoading) {

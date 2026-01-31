@@ -91,7 +91,7 @@ export function InviteMemberModal({
 						<div className="relative">
 							<HugeiconsIcon
 								icon={Mail01Icon}
-								className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground"
+								className="absolute left-3 top-2.5 size-5 text-muted-foreground"
 							/>
 							<Input
 								id="email"
@@ -112,7 +112,7 @@ export function InviteMemberModal({
 								val && setRole(val as "member" | "admin" | "owner")
 							}
 						>
-							<SelectTrigger className="w-full">
+							<SelectTrigger>
 								<SelectValue placeholder="Select a role" />
 							</SelectTrigger>
 							<SelectContent>

@@ -24,7 +24,7 @@ export const EmailFooter = () => {
 			</Text>
 			<Text className="mt-4 text-center text-xs" style={{ color: "#717175" }}>
 				<Link
-					href="https://usenotra.com"
+					href="https://marblecms.com"
 					style={{ color: "#717175", textDecoration: "underline" }}
 				>
 					Website

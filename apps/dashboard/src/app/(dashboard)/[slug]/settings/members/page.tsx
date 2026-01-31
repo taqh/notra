@@ -2,10 +2,7 @@
 
 import {
 	Add01Icon,
-	Delete02Icon,
 	Mail01Icon,
-	MoreVerticalIcon,
-	Refresh01Icon,
 	UserGroupIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -16,13 +13,6 @@ import {
 } from "@notra/ui/components/ui/avatar";
 import { Badge } from "@notra/ui/components/ui/badge";
 import { Button } from "@notra/ui/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@notra/ui/components/ui/dropdown-menu";
 import { Skeleton } from "@notra/ui/components/ui/skeleton";
 import {
 	Tabs,
@@ -30,10 +20,9 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@notra/ui/components/ui/tabs";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { Invitation } from "better-auth/plugins/organization";
 import { use, useState } from "react";
-import { toast } from "sonner";
 import { PageContainer } from "@/components/layout/container";
 import { InviteMemberModal } from "@/components/members/invite-member-modal";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
@@ -64,33 +53,18 @@ export default function MembersPage({ params }: PageProps) {
 			: getOrganization(slug);
 	const [activeTab, setActiveTab] = useState("members");
 	const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-	const queryClient = useQueryClient();
 
 	const { data: members, isLoading: membersLoading } = useQuery<Member[]>({
 		queryKey: ["members", organization?.id],
 		queryFn: async () => {
 			if (!organization?.id) return [];
-			const { data, error } = await authClient.organization.listMembers({
-				query: {
-					organizationId: organization.id,
-				},
-			});
-			if (error) {
-				throw new Error(error.message || "Failed to fetch members");
+			const response = await fetch(
+				`/api/organizations/${organization.id}/members`,
+			);
+			if (!response.ok) {
+				throw new Error("Failed to fetch members");
 			}
-			// Transform Better Auth member format to our Member interface
-			const membersList = data?.members ?? [];
-			return membersList.map((member) => ({
-				id: member.id,
-				userId: member.userId,
-				role: member.role,
-				user: {
-					id: member.user.id,
-					name: member.user.name,
-					email: member.user.email,
-					image: member.user.image ?? null,
-				},
-			}));
+			return response.json();
 		},
 		enabled: !!organization?.id,
 	});
@@ -117,60 +91,6 @@ export default function MembersPage({ params }: PageProps) {
 	const pendingInvitations = invitations?.filter(
 		(inv) => inv.status === "pending",
 	);
-
-	const { mutate: resendInvitation, isPending: isResending } = useMutation({
-		mutationFn: async (invitation: Invitation) => {
-			if (!organization?.id) {
-				throw new Error("Organization not found");
-			}
-			const { error } = await authClient.organization.inviteMember({
-				email: invitation.email,
-				role: invitation.role as "member" | "admin" | "owner",
-				organizationId: organization.id,
-				resend: true,
-			});
-
-			if (error) {
-				throw new Error(error.message || "Failed to resend invitation");
-			}
-		},
-		onMutate: () => {
-			return { toastId: toast.loading("Resending invite...") };
-		},
-		onSuccess: (_data, _variables, context) => {
-			toast.success("Invitation resent successfully", { id: context?.toastId });
-			queryClient.invalidateQueries({
-				queryKey: ["invitations", organization?.id],
-			});
-		},
-		onError: (error: Error, _variables, context) => {
-			toast.error(error.message || "Failed to resend invitation", { id: context?.toastId });
-		},
-	});
-
-	const { mutate: cancelInvitation, isPending: isCanceling } = useMutation({
-		mutationFn: async (invitationId: string) => {
-			const { error } = await authClient.organization.cancelInvitation({
-				invitationId,
-			});
-
-			if (error) {
-				throw new Error(error.message || "Failed to cancel invitation");
-			}
-		},
-		onMutate: () => {
-			return { toastId: toast.loading("Canceling invite...") };
-		},
-		onSuccess: (_data, _variables, context) => {
-			toast.success("Invitation canceled successfully", { id: context?.toastId });
-			queryClient.invalidateQueries({
-				queryKey: ["invitations", organization?.id],
-			});
-		},
-		onError: (error: Error, _variables, context) => {
-			toast.error(error.message || "Failed to cancel invitation", { id: context?.toastId });
-		},
-	});
 
 	if (!organization) {
 		return (
@@ -387,9 +307,6 @@ export default function MembersPage({ params }: PageProps) {
 											<th className="px-4 py-3 text-left text-sm font-medium">
 												Expires
 											</th>
-											<th className="px-4 py-3 text-right text-sm font-medium">
-												Actions
-											</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -417,50 +334,6 @@ export default function MembersPage({ params }: PageProps) {
 												</td>
 												<td className="px-4 py-3 text-sm text-muted-foreground">
 													{invitation.expiresAt.toLocaleDateString()}
-												</td>
-												<td className="px-4 py-3">
-													<div className="flex justify-end">
-														<DropdownMenu>
-															<DropdownMenuTrigger
-																className="flex size-8 items-center justify-center rounded-md hover:bg-accent"
-																disabled={isResending || isCanceling}
-															>
-																<HugeiconsIcon
-																	className="size-4 text-muted-foreground"
-																	icon={MoreVerticalIcon}
-																/>
-															</DropdownMenuTrigger>
-															<DropdownMenuContent
-																align="end"
-																className="min-w-40"
-															>
-																<DropdownMenuItem
-																	onClick={() => resendInvitation(invitation)}
-																	disabled={isResending || isCanceling}
-																>
-																	<HugeiconsIcon
-																		className="size-4"
-																		icon={Refresh01Icon}
-																	/>
-																	Resend Invite
-																</DropdownMenuItem>
-																<DropdownMenuSeparator />
-																<DropdownMenuItem
-																	onClick={() =>
-																		cancelInvitation(invitation.id)
-																	}
-																	disabled={isResending || isCanceling}
-																	variant="destructive"
-																>
-																	<HugeiconsIcon
-																		className="size-4"
-																		icon={Delete02Icon}
-																	/>
-																	Cancel Invite
-																</DropdownMenuItem>
-															</DropdownMenuContent>
-														</DropdownMenu>
-													</div>
 												</td>
 											</tr>
 										))}

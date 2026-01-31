@@ -4,17 +4,8 @@ import { Suspense } from "react";
 import { auth } from "@/lib/auth/server";
 import { getInvitationById } from "@/lib/auth/actions";
 import PageClient from "./page-client";
-import { Loader2Icon } from "lucide-react";
-
-function LoadingSkeleton() {
-	return (
-		<div className="mx-auto w-full max-w-md rounded-[24px] bg-background px-5 py-7 ring-1 ring-foreground/10">
-			<div className="flex min-h-[300px] items-center justify-center">
-				<Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-			</div>
-		</div>
-	);
-}
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Spinner } from "@hugeicons/core-free-icons";
 
 export default async function InvitePage(props: {
 	params: Promise<{ id: string }>;
@@ -23,7 +14,11 @@ export default async function InvitePage(props: {
 	const { id } = params;
 
 	return (
-		<Suspense fallback={<LoadingSkeleton />}>
+		<Suspense fallback={
+			<div className="flex items-center justify-center">
+				<HugeiconsIcon icon={Spinner} className="animate-spin" />
+			</div>
+		}>
 			<InvitePageComponent invitationId={id} />
 		</Suspense>
 	);

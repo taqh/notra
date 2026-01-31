@@ -11,6 +11,7 @@ import { Google } from "@notra/ui/components/ui/svgs/google";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+// biome-ignore lint/performance/noNamespaceImport: Zod recommended way to import
 import * as z from "zod";
 import { authClient } from "@/lib/auth/client";
 
@@ -45,7 +46,7 @@ export function SignupForm({
 	const [showPassword, setShowPassword] = useState(false);
 	const [isAuthLoading, setIsAuthLoading] = useState(false);
 
-	const callbackURL = returnTo || "/callback";
+	const callbackURL = returnTo ? `/callback?returnTo=${encodeURIComponent(returnTo)}` : "/callback";
 
 	async function handleSocialSignup(provider: "google" | "github") {
 		if (isAuthLoading) {
