@@ -42,7 +42,8 @@ import {
 	TabsTrigger,
 } from "@notra/ui/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2Icon, PlusIcon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
+import { Plus } from "@hugeicons/core-free-icons";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/layout/container";
@@ -335,7 +336,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 						organizationId={organizationId ?? ""}
 						trigger={
 							<Button size="sm" variant="default">
-								<PlusIcon className="size-4" />
+								<HugeiconsIcon icon={Plus} className="size-4" />
 								<span className="ml-1">New schedule</span>
 							</Button>
 						}
@@ -369,7 +370,7 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 								organizationId={organizationId ?? ""}
 								trigger={
 									<Button size="sm" variant="outline">
-										<PlusIcon className="size-4" />
+										<HugeiconsIcon icon={Plus} className="size-4" />
 										<span className="ml-1">Add schedule</span>
 									</Button>
 								}
