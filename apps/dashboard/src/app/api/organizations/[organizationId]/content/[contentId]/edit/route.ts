@@ -36,14 +36,17 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     let updatedMarkdown = currentMarkdown;
 
-    const agent = createChatAgent({
-      organizationId,
-      currentMarkdown,
-      selectedText,
-      onMarkdownUpdate: (markdown) => {
-        updatedMarkdown = markdown;
+    const agent = await createChatAgent(
+      {
+        organizationId,
+        currentMarkdown,
+        selectedText,
+        onMarkdownUpdate: (markdown) => {
+          updatedMarkdown = markdown;
+        },
       },
-    });
+      instruction
+    );
 
     await agent.generate({ prompt: instruction });
 

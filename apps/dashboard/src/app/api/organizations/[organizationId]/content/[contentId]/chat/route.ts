@@ -106,7 +106,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
       console.log("[Content Chat] Routing decision:", { requestId, decision: routingDecision });
 
-      return stream.toUIMessageStreamResponse();
+      return stream.toUIMessageStreamResponse({
+        onError: (error) => {
+          console.error("[Content Chat] Stream error:", { requestId, error });
+          if (error instanceof Error) {
+            return error.message;
+          }
+          return "An error occurred while processing your request.";
+        },
+      });
     } catch (orchestrationError) {
       if (tracked && autumn) {
         await autumn.track({

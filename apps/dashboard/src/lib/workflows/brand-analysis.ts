@@ -1,7 +1,7 @@
 "use workflow";
 
 import { SdkError } from "@mendable/firecrawl-js";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { eq } from "drizzle-orm";
 import { FatalError } from "workflow";
 import { db } from "@notra/db/drizzle";
@@ -128,9 +128,9 @@ async function scrapeWebsite(url: string) {
 async function extractBrandInfo(content: string) {
   "use step";
 
-  const { object } = await generateObject({
+  const { output } = await generateText({
     model: openrouter("google/gemini-2.0-flash-001"),
-    schema: brandSettingsSchema,
+    output: Output.object({ schema: brandSettingsSchema }),
     prompt: `Analyze this website content and extract brand identity information.
 
 Website content:
@@ -144,7 +144,7 @@ Extract the following information:
     system: `You are a brand analyst expert. Your job is to analyze website content and extract key brand identity information. Be thorough but concise. Focus on understanding the company's essence, values, and how they communicate.`,
   });
 
-  return object;
+  return output;
 }
 
 interface BrandInfo {

@@ -5,6 +5,7 @@ import {
   getSkillByName,
   listAvailableSkills,
 } from "@/lib/ai/tools/skills";
+import { selectModel, routeMessage } from "@/lib/ai/orchestration/router";
 import { openrouter } from "@/lib/openrouter";
 
 interface ChatAgentContext {
@@ -14,9 +15,15 @@ interface ChatAgentContext {
   onMarkdownUpdate: (markdown: string) => void;
 }
 
-export function createChatAgent(context: ChatAgentContext) {
+export async function createChatAgent(
+  context: ChatAgentContext,
+  instruction: string
+) {
+  const decision = await routeMessage(instruction, false);
+  const model = selectModel(decision);
+
   const modelWithMemory = withSupermemory(
-    openrouter("anthropic/claude-sonnet-4.5"),
+    openrouter(model),
     context.organizationId
   );
 
