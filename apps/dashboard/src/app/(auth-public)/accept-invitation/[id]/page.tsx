@@ -6,6 +6,16 @@ import { getInvitationById } from "@/lib/auth/actions";
 import PageClient from "./page-client";
 import { Loader2Icon } from "lucide-react";
 
+function LoadingSkeleton() {
+	return (
+		<div className="mx-auto w-full max-w-md rounded-[24px] bg-background px-5 py-7 ring-1 ring-foreground/10">
+			<div className="flex min-h-[300px] items-center justify-center">
+				<Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+			</div>
+		</div>
+	);
+}
+
 export default async function InvitePage(props: {
 	params: Promise<{ id: string }>;
 }) {
@@ -13,11 +23,7 @@ export default async function InvitePage(props: {
 	const { id } = params;
 
 	return (
-		<Suspense fallback={
-			<div className="flex items-center justify-center">
-				<Loader2Icon className="animate-spin" />
-			</div>
-		}>
+		<Suspense fallback={<LoadingSkeleton />}>
 			<InvitePageComponent invitationId={id} />
 		</Suspense>
 	);

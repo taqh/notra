@@ -43,6 +43,8 @@ export function OrganizationsSection() {
 
 	const [isSwitching, setIsSwitching] = useState<string | null>(null);
 	const [isLeaving, setIsLeaving] = useState<string | null>(null);
+	const [leavingOrgId, setLeavingOrgId] = useState<string | null>(null);
+	const [isDialogOpen, setIsDialogOpen] = useState<string | null>(null);
 
 	async function switchOrganization(org: Organization) {
 		if (org.slug === activeOrganization?.slug) {
@@ -77,6 +79,7 @@ export function OrganizationsSection() {
 	}
 
 	async function leaveOrganization(org: Organization) {
+		setLeavingOrgId(org.id);
 		setIsLeaving(org.id);
 
 		try {
@@ -86,10 +89,15 @@ export function OrganizationsSection() {
 
 			if (error) {
 				toast.error(error.message || "Failed to leave organization");
+				setLeavingOrgId(null);
+				setIsLeaving(null);
 				return;
 			}
 
 			toast.success(`Left ${org.name}`);
+
+			// Close the dialog
+			setIsDialogOpen(null);
 
 			// Refresh organizations list
 			await queryClient.invalidateQueries({
@@ -115,6 +123,7 @@ export function OrganizationsSection() {
 			toast.error("Failed to leave organization");
 			console.error(error);
 		} finally {
+			setLeavingOrgId(null);
 			setIsLeaving(null);
 		}
 	}
@@ -213,7 +222,15 @@ export function OrganizationsSection() {
 
 									{/* Only show leave button for non-active orgs to simplify UX */}
 									{!isActive && organizations.length > 1 && (
-										<AlertDialog>
+										<AlertDialog
+											open={isDialogOpen === org.id}
+											onOpenChange={(open) => {
+												setIsDialogOpen(open ? org.id : null);
+												if (!open) {
+													setLeavingOrgId(null);
+												}
+											}}
+										>
 											<AlertDialogTrigger
 												render={
 													<Button
@@ -221,14 +238,8 @@ export function OrganizationsSection() {
 														size="sm"
 														variant="ghost"
 													>
-														{isLeaving === org.id ? (
-															<LoaderCircle className="size-4 animate-spin" />
-														) : (
-															<>
-																<HugeiconsIcon icon={Logout02Icon} size={16} />
-																Leave
-															</>
-														)}
+														<HugeiconsIcon icon={Logout02Icon} size={16} />
+														Leave
 													</Button>
 												}
 											/>
@@ -236,18 +247,33 @@ export function OrganizationsSection() {
 												<AlertDialogHeader>
 													<AlertDialogTitle>Leave {org.name}?</AlertDialogTitle>
 													<AlertDialogDescription>
-														You will lose access to this organization and all
-														its content. You'll need to be invited again to
-														rejoin.
+														{leavingOrgId === org.id ? (
+															<div className="flex items-center gap-2">
+																<LoaderCircle className="size-4 animate-spin" />
+																<span>Leaving organization...</span>
+															</div>
+														) : (
+															"You will lose access to this organization and all its content. You'll need to be invited again to rejoin."
+														)}
 													</AlertDialogDescription>
 												</AlertDialogHeader>
 												<AlertDialogFooter>
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogCancel disabled={leavingOrgId === org.id}>
+														Cancel
+													</AlertDialogCancel>
 													<AlertDialogAction
 														className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 														onClick={() => leaveOrganization(org)}
+														disabled={leavingOrgId === org.id}
 													>
-														Leave Organization
+														{leavingOrgId === org.id ? (
+															<>
+																<LoaderCircle className="size-4 animate-spin" />
+																Leaving...
+															</>
+														) : (
+															"Leave Organization"
+														)}
 													</AlertDialogAction>
 												</AlertDialogFooter>
 											</AlertDialogContent>

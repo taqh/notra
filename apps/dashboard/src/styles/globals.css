@@ -4,7 +4,6 @@
 
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
-@plugin "@toolwind/corner-shape";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
