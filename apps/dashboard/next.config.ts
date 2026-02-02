@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -9,6 +10,9 @@ const nextConfig: NextConfig = {
 	experimental: {
 		useCache: true,
 		optimizePackageImports: ["@hugeicons/core-free-icons", "lucide-react"],
+	},
+	turbopack: {
+		root: path.resolve(__dirname, "../.."),
 	},
 	transpilePackages: ["@notra/db", "@notra/ui", "@notra/email"],
 	async redirects() {

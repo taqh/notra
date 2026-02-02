@@ -6,17 +6,22 @@ import {
   posts,
   githubRepositories,
   githubIntegrations,
+  brandSettings,
 } from "@notra/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
+import { z } from "zod";
 import { createGithubChangelogAgent } from "@/lib/ai/agents/changelog";
 import { getBaseUrl } from "@/lib/triggers/qstash";
+import { getValidToneProfile } from "@/lib/ai/prompts/changelog/base";
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 16);
 
-type SchedulePayload = {
-  triggerId: string;
-};
+const schedulePayloadSchema = z.object({
+  triggerId: z.string().min(1),
+});
+
+type SchedulePayload = z.infer<typeof schedulePayloadSchema>;
 
 type TriggerData = {
   id: string;
@@ -41,9 +46,23 @@ type GeneratedContent = {
   markdown: string;
 };
 
+type BrandSettingsData = {
+  toneProfile: string | null;
+  companyName: string | null;
+  companyDescription: string | null;
+  audience: string | null;
+  customInstructions: string | null;
+} | null;
+
 export const { POST } = serve<SchedulePayload>(
   async (context: WorkflowContext<SchedulePayload>) => {
-    const { triggerId } = context.requestPayload;
+    const parseResult = schedulePayloadSchema.safeParse(context.requestPayload);
+    if (!parseResult.success) {
+      console.error("[Schedule] Invalid payload:", parseResult.error.flatten());
+      await context.cancel();
+      return;
+    }
+    const { triggerId } = parseResult.data;
 
     // Step 1: Fetch trigger configuration
     const trigger = await context.run<TriggerData | null>(
@@ -67,7 +86,7 @@ export const { POST } = serve<SchedulePayload>(
           outputConfig: result.outputConfig,
           enabled: result.enabled,
         };
-      }
+      },
     );
 
     if (!trigger) {
@@ -102,27 +121,58 @@ export const { POST } = serve<SchedulePayload>(
           .from(githubRepositories)
           .innerJoin(
             githubIntegrations,
-            eq(githubRepositories.integrationId, githubIntegrations.id)
+            eq(githubRepositories.integrationId, githubIntegrations.id),
           )
           .where(inArray(githubRepositories.id, repositoryIds));
 
         return repos;
-      }
+      },
     );
 
     if (repositories.length === 0) {
-      console.log(`[Schedule] No valid repositories for trigger ${triggerId}, canceling`);
+      console.log(
+        `[Schedule] No valid repositories for trigger ${triggerId}, canceling`,
+      );
       await context.cancel();
       return;
     }
+
+    // Step 2.5: Fetch brand settings for the organization
+    const brand = await context.run<BrandSettingsData>(
+      "fetch-brand-settings",
+      async () => {
+        const result = await db.query.brandSettings.findFirst({
+          where: eq(brandSettings.organizationId, trigger.organizationId),
+        });
+
+        if (!result) {
+          return null;
+        }
+
+        return {
+          toneProfile: result.toneProfile,
+          companyName: result.companyName,
+          companyDescription: result.companyDescription,
+          audience: result.audience,
+          customInstructions: result.customInstructions,
+        };
+      },
+    );
 
     // Step 3: Generate content based on output type
     const content = await context.run<GeneratedContent>(
       "generate-content",
       async () => {
         if (trigger.outputType === "changelog") {
-          // Use the changelog agent to generate content
-          const agent = createGithubChangelogAgent(trigger.organizationId);
+          // Use the changelog agent to generate content with brand settings
+          const agent = createGithubChangelogAgent({
+            organizationId: trigger.organizationId,
+            tone: getValidToneProfile(brand?.toneProfile, "Conversational"),
+            companyName: brand?.companyName ?? undefined,
+            companyDescription: brand?.companyDescription ?? undefined,
+            audience: brand?.audience ?? undefined,
+            customInstructions: brand?.customInstructions ?? undefined,
+          });
 
           // Build prompt with repository context
           const repoList = repositories
@@ -150,14 +200,14 @@ export const { POST } = serve<SchedulePayload>(
 
         // For other output types, log and return placeholder
         console.log(
-          `[Schedule] Output type ${trigger.outputType} not fully implemented yet`
+          `[Schedule] Output type ${trigger.outputType} not fully implemented yet`,
         );
 
         return {
           title: `${trigger.outputType} - ${new Date().toLocaleDateString()}`,
           markdown: `*Automated ${trigger.outputType} generation is coming soon.*\n\nRepositories: ${repositories.map((r) => `${r.owner}/${r.repo}`).join(", ")}`,
         };
-      }
+      },
     );
 
     // Step 4: Save post to database
@@ -185,8 +235,8 @@ export const { POST } = serve<SchedulePayload>(
     failureFunction: async ({ context, failStatus, failResponse }) => {
       console.error(
         `[Schedule] Workflow failed for trigger ${context.requestPayload.triggerId}:`,
-        { status: failStatus, response: failResponse }
+        { status: failStatus, response: failResponse },
       );
     },
-  }
+  },
 );
