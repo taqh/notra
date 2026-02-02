@@ -8,7 +8,7 @@ import {
 	PauseIcon,
 	PlayCircleIcon,
 	PlayIcon,
-	PlusSignIcon
+	PlusSignIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -458,7 +458,9 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
 						<AlertDialogDescription>
 							This will permanently delete this{" "}
 							{triggerToDelete
-								? formatFrequency(triggerToDelete.sourceConfig.cron).toLowerCase()
+								? formatFrequency(
+										triggerToDelete.sourceConfig.cron,
+									).toLowerCase()
 								: ""}{" "}
 							schedule. This action cannot be undone.
 						</AlertDialogDescription>
@@ -557,7 +559,8 @@ function ScheduleTable({
 				</TableHeader>
 				<TableBody>
 					{triggers.map((trigger) => {
-						const isThisUpdating = isUpdating && updatingTriggerId === trigger.id;
+						const isThisUpdating =
+							isUpdating && updatingTriggerId === trigger.id;
 						const isThisRunning = isRunning && runningTriggerId === trigger.id;
 
 						return (
@@ -612,7 +615,10 @@ function ScheduleTable({
 												disabled={isRunning || !trigger.enabled}
 												onClick={() => onRunNow(trigger.id)}
 											>
-												<HugeiconsIcon className="size-4" icon={PlayCircleIcon} />
+												<HugeiconsIcon
+													className="size-4"
+													icon={PlayCircleIcon}
+												/>
 												Run now
 											</DropdownMenuItem>
 											<DropdownMenuItem
