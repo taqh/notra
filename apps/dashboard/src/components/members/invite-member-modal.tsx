@@ -1,7 +1,5 @@
 "use client";
 
-import { Mail01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@notra/ui/components/ui/button";
 import {
 	Dialog,
@@ -88,21 +86,14 @@ export function InviteMemberModal({
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
 						<Label htmlFor="email">Email address</Label>
-						<div className="relative">
-							<HugeiconsIcon
-								icon={Mail01Icon}
-								className="absolute left-3 top-2.5 size-5 text-muted-foreground"
-							/>
-							<Input
-								id="email"
-								type="email"
-								placeholder="member@example.com"
-								className="pl-10"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								required
-							/>
-						</div>
+						<Input
+							id="email"
+							type="email"
+							placeholder="member@example.com"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							required
+						/>
 					</div>
 					<div className="space-y-2">
 						<Label htmlFor="role">Role</Label>
@@ -112,7 +103,7 @@ export function InviteMemberModal({
 								val && setRole(val as "member" | "admin" | "owner")
 							}
 						>
-							<SelectTrigger>
+							<SelectTrigger className="w-full">
 								<SelectValue placeholder="Select a role" />
 							</SelectTrigger>
 							<SelectContent>
