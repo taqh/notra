@@ -1,3 +1,5 @@
+import { db } from "@notra/db/drizzle";
+import { members, organizations } from "@notra/db/schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -9,8 +11,6 @@ import {
 import { eq } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 import { cookies } from "next/headers";
-import { db } from "@notra/db/drizzle";
-import { members, organizations } from "@notra/db/schema";
 import { autumn } from "@/lib/billing/autumn";
 import { redis } from "@/lib/redis";
 import { generateOrganizationAvatar } from "@/lib/utils";
