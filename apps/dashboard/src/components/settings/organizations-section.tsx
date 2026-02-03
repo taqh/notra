@@ -91,15 +91,20 @@ export function OrganizationsSection() {
 
 			toast.success(`Left ${org.name}`);
 
-			// Refresh organizations list
+			// Refresh organizations list and wait for fresh data
 			await queryClient.invalidateQueries({
 				queryKey: QUERY_KEYS.AUTH.organizations,
 			});
+			const freshOrgs = await queryClient.fetchQuery({
+				queryKey: QUERY_KEYS.AUTH.organizations,
+				queryFn: async () => {
+					const result = await authClient.organization.list();
+					return result.data ?? [];
+				},
+			});
 
-			// If we left the active organization, switch to another one
 			if (activeOrganization?.id === org.id) {
-				const remainingOrgs = organizations.filter((o) => o.id !== org.id);
-				const firstOrg = remainingOrgs[0];
+				const firstOrg = freshOrgs[0];
 				if (firstOrg) {
 					await authClient.organization.setActive({
 						organizationId: firstOrg.id,

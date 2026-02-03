@@ -46,7 +46,9 @@ export function SignupForm({
 	const [showPassword, setShowPassword] = useState(false);
 	const [isAuthLoading, setIsAuthLoading] = useState(false);
 
-	const callbackURL = returnTo ? `/callback?returnTo=${encodeURIComponent(returnTo)}` : "/callback";
+	const callbackURL = returnTo
+		? `/callback?returnTo=${encodeURIComponent(returnTo)}`
+		: "/callback";
 
 	async function handleSocialSignup(provider: "google" | "github") {
 		if (isAuthLoading) {
@@ -81,27 +83,33 @@ export function SignupForm({
 		}
 
 		setIsAuthLoading(true);
-		const result = await authClient.signUp.email({
-			email,
-			password,
-			name: email.split("@")[0] || "User",
-		});
+		try {
+			const result = await authClient.signUp.email({
+				email,
+				password,
+				name: email.split("@")[0] || "User",
+			});
 
-		if (result.error) {
-			toast.error(
-				result.error.message ?? "Failed to sign up. Please try again.",
-			);
+			if (result.error) {
+				toast.error(
+					result.error.message ?? "Failed to sign up. Please try again.",
+				);
+				setIsAuthLoading(false);
+				return;
+			}
+
+			// Call onSuccess callback if provided, otherwise redirect
+			if (onSuccess) {
+				onSuccess();
+			} else if (returnTo) {
+				window.location.href = returnTo;
+			} else {
+				window.location.href = "/callback";
+			}
+		} catch (error) {
+			console.error("Email signup error:", error);
+			toast.error("Failed to sign up. Please try again.");
 			setIsAuthLoading(false);
-			return;
-		}
-
-		// Call onSuccess callback if provided, otherwise redirect
-		if (onSuccess) {
-			onSuccess();
-		} else if (returnTo) {
-			window.location.href = returnTo;
-		} else {
-			window.location.href = "/callback";
 		}
 	}
 
@@ -109,8 +117,12 @@ export function SignupForm({
 		<div className="flex w-full flex-col gap-8">
 			{(title || description) && (
 				<div className="text-center">
-					{title && <h1 className="font-semibold text-xl lg:text-2xl">{title}</h1>}
-					{description && <p className="text-muted-foreground text-sm">{description}</p>}
+					{title && (
+						<h1 className="font-semibold text-xl lg:text-2xl">{title}</h1>
+					)}
+					{description && (
+						<p className="text-muted-foreground text-sm">{description}</p>
+					)}
 				</div>
 			)}
 

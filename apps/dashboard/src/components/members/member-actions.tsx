@@ -119,7 +119,7 @@ export function MemberActions({ member }: MemberActionsProps) {
 		setIsRemoving(true);
 		try {
 			const { error } = await authClient.organization.removeMember({
-				memberIdOrEmail: member.userId,
+				memberIdOrEmail: member.id,
 				organizationId: activeOrganization.id,
 			});
 

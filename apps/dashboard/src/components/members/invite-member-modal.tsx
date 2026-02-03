@@ -70,6 +70,18 @@ export function InviteMemberModal({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
+
+		if (!organizationId) {
+			toast.error("Organization ID is missing. Please try again.");
+			return;
+		}
+
+		const trimmedEmail = email.trim();
+		if (!trimmedEmail) {
+			toast.error("Please enter an email address.");
+			return;
+		}
+
 		inviteMember();
 	};
 

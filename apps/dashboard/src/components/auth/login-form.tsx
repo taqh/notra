@@ -35,7 +35,9 @@ export function LoginForm({
 	const [isAuthLoading, setIsAuthLoading] = useState(false);
 	const lastMethod = authClient.getLastUsedLoginMethod();
 
-	const callbackURL = returnTo ? `/callback?returnTo=${encodeURIComponent(returnTo)}` : "/callback";
+	const callbackURL = returnTo
+		? `/callback?returnTo=${encodeURIComponent(returnTo)}`
+		: "/callback";
 
 	async function handleSocialLogin(provider: "google" | "github") {
 		if (isAuthLoading) {
@@ -65,26 +67,32 @@ export function LoginForm({
 		}
 
 		setIsAuthLoading(true);
-		const result = await authClient.signIn.email({
-			email,
-			password,
-		});
+		try {
+			const result = await authClient.signIn.email({
+				email,
+				password,
+			});
 
-		if (result.error) {
-			toast.error(
-				result.error.message ?? "Failed to sign in. Please try again.",
-			);
+			if (result.error) {
+				toast.error(
+					result.error.message ?? "Failed to sign in. Please try again.",
+				);
+				setIsAuthLoading(false);
+				return;
+			}
+
+			// Call onSuccess callback if provided, otherwise redirect
+			if (onSuccess) {
+				onSuccess();
+			} else if (returnTo) {
+				window.location.href = returnTo;
+			} else {
+				window.location.href = "/callback";
+			}
+		} catch (error) {
+			console.error("Email login error:", error);
+			toast.error("Failed to sign in. Please try again.");
 			setIsAuthLoading(false);
-			return;
-		}
-
-		// Call onSuccess callback if provided, otherwise redirect
-		if (onSuccess) {
-			onSuccess();
-		} else if (returnTo) {
-			window.location.href = returnTo;
-		} else {
-			window.location.href = "/callback";
 		}
 	}
 
@@ -92,8 +100,12 @@ export function LoginForm({
 		<div className="flex w-full flex-col gap-8">
 			{(title || description) && (
 				<div className="text-center">
-					{title && <h1 className="font-semibold text-xl lg:text-2xl">{title}</h1>}
-					{description && <p className="text-muted-foreground text-sm">{description}</p>}
+					{title && (
+						<h1 className="font-semibold text-xl lg:text-2xl">{title}</h1>
+					)}
+					{description && (
+						<p className="text-muted-foreground text-sm">{description}</p>
+					)}
 				</div>
 			)}
 

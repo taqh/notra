@@ -97,36 +97,39 @@ export function DeleteAccountSection() {
 	async function handleDeleteAccount() {
 		setIsDeleting(true);
 		try {
-			// If there are organizations to process, handle transfers first
 			if (ownedOrganizations.length > 0) {
 				const transfers: TransferDecision[] = [
-					// Organizations with other members - use user's decision
 					...orgsWithOtherMembers.map((org) => ({
 						orgId: org.id,
 						action: decisions[org.id] || ("delete" as const),
 					})),
-					// Sole owner orgs - always delete
 					...soleOwnerOrgs.map((org) => ({
 						orgId: org.id,
 						action: "delete" as const,
 					})),
 				];
 
-				const response = await fetch("/api/user/delete-with-transfers", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ transfers }),
-				});
+				try {
+					const response = await fetch("/api/user/delete-with-transfers", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ transfers }),
+					});
 
-				if (!response.ok) {
-					const error = await response.json();
-					toast.error(error.error ?? "Failed to process organizations");
+					if (!response.ok) {
+						const error = await response.json();
+						toast.error(error.error ?? "Failed to process organizations");
+						setIsDeleting(false);
+						return;
+					}
+				} catch (fetchError) {
+					console.error("Failed to process organizations:", fetchError);
+					toast.error("Failed to process organizations. Please try again.");
 					setIsDeleting(false);
 					return;
 				}
 			}
 
-			// Now delete the user account
 			const result = await authClient.deleteUser({
 				callbackURL: "/",
 			});
