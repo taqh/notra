@@ -17,7 +17,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CheckIcon,
   CopyIcon,
-  ExternalLinkIcon,
   EyeIcon,
   EyeOffIcon,
 } from "lucide-react";
