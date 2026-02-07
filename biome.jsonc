@@ -30,7 +30,7 @@
       },
       "style": {
         /* Needs more work to fix */
-        "noNestedTernary": "off",
+        "noNestedTernary": "warn",
 
         /* Doesn't work with Astro */
         "useFilenamingConvention": "off",
