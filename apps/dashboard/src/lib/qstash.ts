@@ -2,7 +2,7 @@ import { Client as WorkflowClient } from "@upstash/workflow";
 
 const token = process.env.QSTASH_TOKEN;
 
-if(!token) {
+if (!token) {
   throw new Error("QSTASH_TOKEN is not defined");
 }
 

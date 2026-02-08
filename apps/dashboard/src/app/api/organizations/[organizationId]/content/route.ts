@@ -36,7 +36,9 @@ function getDateRange(dateParam: string | null): {
   startDate: Date;
   endDate: Date;
 } | null {
-  if (!dateParam) { return null; }
+  if (!dateParam) {
+    return null;
+  }
 
   const baseDate = dateParam === "today" ? new Date() : new Date(dateParam);
 
