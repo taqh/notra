@@ -177,7 +177,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ trigger });
     } catch (dbError) {
       if (qstashScheduleId) {
-        await deleteQstashSchedule(qstashScheduleId).catch(() => {});
+        await deleteQstashSchedule(qstashScheduleId).catch((error) => {
+          console.error("Error deleting schedule:", error);
+        });
       }
       throw dbError;
     }
@@ -300,13 +302,17 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
         .returning();
 
       if (oldQstashScheduleId) {
-        await deleteQstashSchedule(oldQstashScheduleId).catch(() => {});
+        await deleteQstashSchedule(oldQstashScheduleId).catch((error) => {
+          console.error("Error deleting schedule:", error);
+        });
       }
 
       return NextResponse.json({ trigger });
     } catch (dbError) {
       if (newQstashScheduleId) {
-        await deleteQstashSchedule(newQstashScheduleId).catch(() => {});
+        await deleteQstashSchedule(newQstashScheduleId).catch((error) => {
+          console.error("Error deleting schedule:", error);
+        });
       }
       throw dbError;
     }

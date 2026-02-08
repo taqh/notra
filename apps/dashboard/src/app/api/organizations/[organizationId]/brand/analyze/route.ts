@@ -1,6 +1,6 @@
-import { Client as WorkflowClient } from "@upstash/workflow";
 import { type NextRequest, NextResponse } from "next/server";
 import { withOrganizationAuth } from "@/lib/auth/organization";
+import { workflowClient } from "@/lib/qstash";
 import { getAppUrl } from "@/lib/triggers/qstash";
 import { analyzeBrandSchema } from "@/utils/schemas/brand";
 
@@ -32,10 +32,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     const { url } = validationResult.data;
 
-    const client = new WorkflowClient({ token: process.env.QSTASH_TOKEN! });
     const appUrl = getAppUrl();
 
-    await client.trigger({
+    await workflowClient.trigger({
       url: `${appUrl}/api/workflows/brand-analysis`,
       body: { organizationId, url },
     });

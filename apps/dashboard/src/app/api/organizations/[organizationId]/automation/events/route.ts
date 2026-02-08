@@ -1,6 +1,6 @@
+import crypto from "node:crypto";
 import { db } from "@notra/db/drizzle";
 import { contentTriggers } from "@notra/db/schema";
-import crypto from "crypto";
 import { and, eq, ne } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 import type { NextRequest } from "next/server";

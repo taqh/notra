@@ -1,9 +1,9 @@
+import crypto from "node:crypto";
 import { db } from "@notra/db/drizzle";
 import {
   contentTriggerLookbackWindows,
   contentTriggers,
 } from "@notra/db/schema";
-import crypto from "crypto";
 import { and, eq, inArray, ne } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 import type { NextRequest } from "next/server";
@@ -263,7 +263,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ trigger });
     } catch (dbError) {
       if (qstashScheduleId) {
-        await deleteQstashSchedule(qstashScheduleId).catch(() => {});
+        await deleteQstashSchedule(qstashScheduleId).catch((error) => {
+          console.error("Error deleting schedule:", error);
+        });
       }
 
       await db
@@ -274,7 +276,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
             eq(contentTriggers.organizationId, organizationId)
           )
         )
-        .catch(() => {});
+        .catch((error) => {
+          console.error("Error deleting trigger:", error);
+        });
 
       throw dbError;
     }
@@ -425,7 +429,9 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ trigger });
     } catch (dbError) {
       if (qstashScheduleId && qstashScheduleId !== existingScheduleId) {
-        await deleteQstashSchedule(qstashScheduleId).catch(() => {});
+        await deleteQstashSchedule(qstashScheduleId).catch((error) => {
+          console.error("Error deleting schedule:", error);
+        });
       }
       throw dbError;
     }

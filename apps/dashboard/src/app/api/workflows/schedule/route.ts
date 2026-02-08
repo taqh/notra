@@ -25,7 +25,7 @@ const schedulePayloadSchema = z.object({
 
 type SchedulePayload = z.infer<typeof schedulePayloadSchema>;
 
-type TriggerData = {
+interface TriggerData {
   id: string;
   organizationId: string;
   sourceType: string;
@@ -34,19 +34,19 @@ type TriggerData = {
   outputType: string;
   outputConfig: unknown;
   enabled: boolean;
-};
+}
 
-type RepositoryData = {
+interface RepositoryData {
   id: string;
   owner: string;
   repo: string;
   integrationId: string;
-};
+}
 
-type GeneratedContent = {
+interface GeneratedContent {
   title: string;
   markdown: string;
-};
+}
 
 type BrandSettingsData = {
   toneProfile: string | null;
