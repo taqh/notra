@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@notra/ui/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { ActivityFeed } from "../components/activity-feed";
@@ -26,7 +27,7 @@ export default function LandingPage() {
 
           <div className="relative z-10 flex flex-col items-center justify-center gap-4 self-stretch overflow-hidden border-border/70 border-b pt-[9px] sm:gap-6 md:gap-8 lg:gap-[66px]">
             <div className="absolute top-0 left-0 z-20 flex h-12 w-full items-center justify-center px-6 sm:h-14 sm:px-8 md:h-16 md:px-12 lg:h-[84px] lg:px-0">
-              <div className="relative z-30 flex h-10 w-full max-w-[calc(100%-32px)] items-center justify-between overflow-hidden rounded-lg bg-background px-3 py-1.5 pr-2 shadow-[0px_0px_0px_2px_white] backdrop-blur-sm sm:h-11 sm:max-w-[calc(100%-48px)] sm:px-4 sm:py-2 sm:pr-3 md:h-12 md:max-w-[calc(100%-64px)] md:px-4 lg:w-[960px] lg:max-w-[960px]">
+              <div className="relative z-30 flex h-10 w-full max-w-[calc(100%-32px)] items-center justify-between overflow-hidden rounded-lg border border-border/60 bg-background px-3 py-1.5 pr-2 shadow-[0px_1px_2px_rgba(2,6,23,0.05)] backdrop-blur-sm sm:h-11 sm:max-w-[calc(100%-48px)] sm:px-4 sm:py-2 sm:pr-3 md:h-12 md:max-w-[calc(100%-64px)] md:px-4 lg:w-[960px] lg:max-w-[960px]">
                 <div className="flex items-center justify-center">
                   <Link
                     className="flex items-center justify-start gap-2"
@@ -62,13 +63,15 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="flex h-6 items-start justify-start gap-2 sm:h-7 sm:gap-3 md:h-8">
-                  <Link
-                    className="inline-flex items-center justify-center overflow-hidden border border-transparent bg-white px-2 py-1 shadow-[0px_1px_2px_rgba(55,50,47,0.12)] hover:bg-muted sm:px-3 sm:py-[6px] md:px-[14px]"
-                    href="https://app.usenotra.com"
-                  >
-                    <span className="flex flex-col justify-center font-medium font-sans text-primary text-xs leading-5 md:text-[13px]">
-                      Log in
-                    </span>
+                  <Link href="https://app.usenotra.com">
+                    <Button
+                      className="overflow-hidden rounded-lg border-transparent bg-white px-2 py-1 shadow-[0px_1px_2px_rgba(55,50,47,0.12)] hover:bg-muted sm:px-3 sm:py-[6px] md:px-[14px]"
+                      variant="ghost"
+                    >
+                      <span className="flex flex-col justify-center font-medium font-sans text-primary text-xs leading-5 md:text-[13px]">
+                        Log in
+                      </span>
+                    </Button>
                   </Link>
                 </div>
               </div>
@@ -93,13 +96,12 @@ export default function LandingPage() {
 
               <div className="relative z-10 mt-6 flex w-full max-w-[497px] flex-col items-center justify-center gap-6 sm:mt-8 sm:gap-8 md:mt-10 md:gap-10 lg:mt-12 lg:w-[497px] lg:gap-12">
                 <div className="flex items-center justify-start gap-4 backdrop-blur-[8.25px]">
-                  <Link
-                    className="inline-flex h-10 items-center justify-center overflow-hidden border border-transparent bg-primary px-6 py-2 shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] hover:bg-primary-hover sm:h-11 sm:px-8 sm:py-[6px] md:h-12 md:px-10 lg:px-12"
-                    href="https://app.usenotra.com"
-                  >
-                    <span className="flex flex-col justify-center font-medium font-sans text-primary-foreground text-sm leading-5 sm:text-base md:text-[15px]">
-                      Start for free
-                    </span>
+                  <Link href="https://app.usenotra.com">
+                    <Button className="h-10 overflow-hidden rounded-lg border-transparent bg-primary px-6 py-2 shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] hover:bg-primary-hover sm:h-11 sm:px-8 sm:py-[6px] md:h-12 md:px-10 lg:px-12">
+                      <span className="flex flex-col justify-center font-medium font-sans text-primary-foreground text-sm leading-5 sm:text-base md:text-[15px]">
+                        Start for free
+                      </span>
+                    </Button>
                   </Link>
                 </div>
               </div>
