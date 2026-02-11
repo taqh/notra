@@ -1,18 +1,11 @@
 import type React from "react";
 
 interface EffortlessIntegrationProps {
-  /** Fixed width from Figma: 482px */
   width?: number | string;
-  /** Fixed height from Figma: 300px */
   height?: number | string;
-  /** Optional className to pass to root */
   className?: string;
 }
 
-/**
- * Effortless Integration – Service integration constellation
- * Three concentric rings with logos positioned on ring axes
- */
 const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
   width = 482,
   height = 300,
@@ -21,9 +14,9 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
   const centerX = 250;
   const centerY = 179;
   const rings = [
-    { radius: 80, logos: 2 }, // Inner ring - 2 logos
-    { radius: 120, logos: 3 }, // Middle ring - 3 logos
-    { radius: 160, logos: 2 }, // Outer ring - 2 logos
+    { radius: 80, logos: 2 },
+    { radius: 120, logos: 3 },
+    { radius: 160, logos: 2 },
   ];
 
   const getPositionOnRing = (ringRadius: number, angle: number) => ({
@@ -59,7 +52,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
         }}
       />
 
-      {/* Outer ring */}
       <div
         style={{
           position: "absolute",
@@ -73,7 +65,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           opacity: 0.8,
         }}
       />
-      {/* Middle ring */}
       <div
         style={{
           position: "absolute",
@@ -87,7 +78,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           opacity: 0.7,
         }}
       />
-      {/* Inner ring */}
       <div
         style={{
           position: "absolute",
@@ -102,7 +92,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
         }}
       />
 
-      {/* Company logos positioned systematically on ring axes */}
       <div
         style={{
           width: "500px",
@@ -113,7 +102,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           position: "absolute",
         }}
       >
-        {/* Central hub */}
         <div
           style={{
             width: "72px",
@@ -136,7 +124,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           b
         </div>
 
-        {/* GitHub - 180° (left) */}
         <div
           style={{
             width: "32px",
@@ -163,7 +150,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           />
         </div>
 
-        {/* Slack - 0° (right) */}
         <div
           style={{
             width: "32px",
@@ -189,7 +175,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           />
         </div>
 
-        {/* Figma - 315° (top-right) */}
         <div
           style={{
             width: "32px",
@@ -215,7 +200,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           />
         </div>
 
-        {/* Discord - 135° (bottom-left) */}
         <div
           style={{
             width: "32px",
@@ -242,7 +226,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           />
         </div>
 
-        {/* Notion - 225° (bottom-left diagonal) */}
         <div
           style={{
             width: "32px",
@@ -268,7 +251,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           />
         </div>
 
-        {/* Stripe - 180° (left) */}
         <div
           style={{
             width: "32px",
@@ -295,7 +277,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
           />
         </div>
 
-        {/* Framer - 0° (right) */}
         <div
           style={{
             width: "32px",
@@ -345,7 +326,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
             </linearGradient>
           </defs>
 
-          {/* Inner ring connections */}
           <line
             opacity="0.2"
             stroke="url(#connectionGradient)"
@@ -365,7 +345,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
             y2={getPositionOnRing(80, Math.PI).y}
           />
 
-          {/* Middle ring connections */}
           <line
             opacity="0.15"
             stroke="url(#connectionGradient)"
@@ -394,7 +373,6 @@ const EffortlessIntegration: React.FC<EffortlessIntegrationProps> = ({
             y2={getPositionOnRing(120, (5 * Math.PI) / 4).y}
           />
 
-          {/* Outer ring connections */}
           <line
             opacity="0.1"
             stroke="url(#connectionGradient)"

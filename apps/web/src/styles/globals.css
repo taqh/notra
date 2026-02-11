@@ -10,25 +10,26 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: #f7f5f3;
+  --foreground: #49423d;
+  --card: #ffffff;
+  --card-foreground: #49423d;
+  --popover: #ffffff;
+  --popover-foreground: #49423d;
+  --primary: oklch(0.6056 0.2189 292.7172);
+  --primary-foreground: oklch(0.997 0 0);
+  --primary-hover: oklch(0.5 0.22 292.72);
+  --secondary: #f0efee;
+  --secondary-foreground: #37322f;
+  --muted: #f0efee;
+  --muted-foreground: #605a57;
+  --accent: #f0efee;
+  --accent-foreground: oklch(0.6056 0.2189 292.7172);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #e0dedb;
+  --input: #e0dedb;
+  --ring: oklch(0.6056 0.2189 292.7172);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -43,7 +44,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  /* Updated font variables with explicit fallbacks for deployment */
   --font-inter:
     "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     sans-serif;
@@ -64,6 +64,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -102,7 +103,6 @@
     @apply bg-background text-foreground;
   }
 
-  /* Force text selection to be visible */
   ::selection {
     background-color: oklch(0.6056 0.2189 292.7172 / 0.3);
     color: inherit;
@@ -114,7 +114,6 @@
 }
 
 @layer components {
-  /* Container variants using container queries */
   .page-container {
     width: 100%;
     margin-left: auto;
@@ -141,7 +140,6 @@
     }
   }
 
-  /* Relaxed variant - balanced for readability */
   .page-container-relaxed {
     width: 100%;
     margin-left: auto;
@@ -173,7 +171,6 @@
     }
   }
 
-  /* Compact variant - focused for forms/settings */
   .page-container-compact {
     width: 100%;
     margin-left: auto;

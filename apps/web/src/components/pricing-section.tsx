@@ -1,7 +1,9 @@
 "use client";
 
+import { Button } from "@notra/ui/components/ui/button";
+import { Card } from "@notra/ui/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@notra/ui/components/ui/tabs";
 import { useState } from "react";
-
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annually">(
     "annually"
@@ -14,50 +16,23 @@ export default function PricingSection() {
     },
     professional: {
       monthly: 20,
-      annually: 16, // 20% discount for annual
+      annually: 16,
     },
     enterprise: {
       monthly: 200,
-      annually: 160, // 20% discount for annual
+      annually: 160,
     },
   };
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-2">
-      {/* Header Section */}
-      <div className="flex items-center justify-center gap-6 self-stretch border-[rgba(55,50,47,0.12)] border-b px-6 py-12 md:px-24 md:py-16">
+      <div className="flex items-center justify-center gap-6 self-stretch border-primary/12 border-b px-6 py-12 md:px-24 md:py-16">
         <div className="flex w-full max-w-[586px] flex-col items-center justify-start gap-4 overflow-hidden rounded-lg px-6 py-5 shadow-[0px_2px_4px_rgba(50,45,43,0.06)] shadow-none">
-          {/* Pricing Badge */}
-          <div className="flex items-center justify-start gap-[8px] overflow-hidden rounded-[90px] border border-[rgba(2,6,23,0.08)] bg-white px-[14px] py-[6px] shadow-[0px_0px_0px_4px_rgba(55,50,47,0.05)] shadow-xs">
-            <div className="relative flex h-[14px] w-[14px] items-center justify-center overflow-hidden">
-              <svg
-                fill="none"
-                height="12"
-                viewBox="0 0 12 12"
-                width="12"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M6 1V11M8.5 3H4.75C4.28587 3 3.84075 3.18437 3.51256 3.51256C3.18437 3.84075 3 4.28587 3 4.75C3 5.21413 3.18437 5.65925 3.51256 5.98744C3.84075 6.31563 4.28587 6.5 4.75 6.5H7.25C7.71413 6.5 8.15925 6.68437 8.48744 7.01256C8.81563 7.34075 9 7.78587 9 8.25C9 8.71413 8.81563 9.15925 8.48744 9.48744C8.15925 9.81563 7.71413 10 7.25 10H3.5"
-                  stroke="#37322F"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1"
-                />
-              </svg>
-            </div>
-            <div className="flex flex-col justify-center text-center font-medium font-sans text-[#37322F] text-xs leading-3">
-              Plans & Pricing
-            </div>
-          </div>
-
-          {/* Title */}
-          <div className="flex flex-col justify-center self-stretch text-center font-sans font-semibold text-3xl text-[#49423D] leading-tight tracking-tight md:text-5xl md:leading-[60px]">
+          <div className="flex flex-col justify-center self-stretch text-center font-sans font-semibold text-3xl text-foreground leading-tight tracking-tight md:text-5xl md:leading-[60px]">
             Choose the perfect plan for your business
           </div>
 
-          {/* Description */}
-          <div className="self-stretch text-center font-normal font-sans text-[#605A57] text-base leading-7">
+          <div className="self-stretch text-center font-normal font-sans text-base text-muted-foreground leading-7">
             Scale your operations with flexible pricing that grows with your
             team.
             <br />
@@ -66,63 +41,63 @@ export default function PricingSection() {
         </div>
       </div>
 
-      {/* Billing Toggle Section */}
-      <div className="relative flex items-center justify-center gap-4 self-stretch px-6 py-9 md:px-16">
-        {/* Horizontal line */}
-        <div className="-translate-x-1/2 absolute top-[63px] left-1/2 z-0 h-0 w-full max-w-[1060px] transform border-[rgba(55,50,47,0.12)] border-t" />
+      <Tabs
+        className="relative flex flex-col items-center justify-center gap-0 self-stretch px-6 py-9 md:px-16"
+        onValueChange={(value) =>
+          setBillingPeriod(value as "monthly" | "annually")
+        }
+        value={billingPeriod}
+      >
+        <div className="-translate-x-1/2 absolute top-[63px] left-1/2 z-0 h-0 w-full max-w-[1060px] transform border-primary/12 border-t" />
 
-        {/* Toggle Container */}
-        <div className="before:-z-10 relative z-20 flex items-center justify-center rounded-lg border border-[rgba(55,50,47,0.02)] bg-[rgba(55,50,47,0.03)] p-3 backdrop-blur-[44px] backdrop-brightness-110 backdrop-saturate-150 before:absolute before:inset-0 before:rounded-lg before:bg-white before:opacity-60">
-          <div className="relative flex items-center justify-center gap-[2px] rounded-[99px] border-[0.5px] border-[rgba(55,50,47,0.08)] bg-[rgba(55,50,47,0.10)] p-[2px] shadow-[0px_1px_0px_white]">
+        <div className="relative z-20 flex items-center justify-center rounded-lg border border-primary/6 bg-background p-3">
+          <TabsList className="relative h-auto gap-[2px] rounded-[99px] border-[0.5px] border-primary/8 bg-primary/10 p-[2px] shadow-[0px_1px_0px_white]">
             <div
               className={`absolute top-[2px] h-[calc(100%-4px)] w-[calc(50%-1px)] rounded-[99px] bg-white shadow-[0px_2px_4px_rgba(0,0,0,0.08)] transition-all duration-300 ease-in-out ${
                 billingPeriod === "annually" ? "left-[2px]" : "right-[2px]"
               }`}
             />
 
-            <button
-              className="relative z-10 flex flex-1 items-center justify-center gap-2 rounded-[99px] px-4 py-1 transition-colors duration-300"
-              onClick={() => setBillingPeriod("annually")}
+            <TabsTrigger
+              className="relative z-10 h-auto cursor-pointer rounded-[99px] border-transparent bg-transparent px-4 py-1 shadow-none transition-colors duration-300 hover:bg-transparent data-active:border-transparent data-active:bg-transparent data-active:shadow-none"
+              value="annually"
             >
-              <div
+              <span
                 className={`font-medium font-sans text-[13px] leading-5 transition-colors duration-300 ${
                   billingPeriod === "annually"
-                    ? "text-[#37322F]"
-                    : "text-[#6B7280]"
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 }`}
               >
                 Annually
-              </div>
-            </button>
+              </span>
+            </TabsTrigger>
 
-            <button
-              className="relative z-10 flex flex-1 items-center justify-center gap-2 rounded-[99px] px-4 py-1 transition-colors duration-300"
-              onClick={() => setBillingPeriod("monthly")}
+            <TabsTrigger
+              className="relative z-10 h-auto cursor-pointer rounded-[99px] border-transparent bg-transparent px-4 py-1 shadow-none transition-colors duration-300 hover:bg-transparent data-active:border-transparent data-active:bg-transparent data-active:shadow-none"
+              value="monthly"
             >
-              <div
+              <span
                 className={`font-medium font-sans text-[13px] leading-5 transition-colors duration-300 ${
                   billingPeriod === "monthly"
-                    ? "text-[#37322F]"
-                    : "text-[#6B7280]"
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 }`}
               >
                 Monthly
-              </div>
-            </button>
-          </div>
+              </span>
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Decorative dots */}
-          <div className="absolute top-[5.25px] left-[5px] h-[3px] w-[3px] rounded-[99px] bg-[rgba(55,50,47,0.10)] shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
-          <div className="absolute top-[5.25px] right-[5px] h-[3px] w-[3px] rounded-[99px] bg-[rgba(55,50,47,0.10)] shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
-          <div className="absolute bottom-[5.25px] left-[5px] h-[3px] w-[3px] rounded-[99px] bg-[rgba(55,50,47,0.10)] shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
-          <div className="absolute right-[5px] bottom-[5.25px] h-[3px] w-[3px] rounded-[99px] bg-[rgba(55,50,47,0.10)] shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
+          <div className="absolute top-[5.25px] left-[5px] h-[3px] w-[3px] rounded-[99px] bg-primary/10 shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
+          <div className="absolute top-[5.25px] right-[5px] h-[3px] w-[3px] rounded-[99px] bg-primary/10 shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
+          <div className="absolute bottom-[5.25px] left-[5px] h-[3px] w-[3px] rounded-[99px] bg-primary/10 shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
+          <div className="absolute right-[5px] bottom-[5.25px] h-[3px] w-[3px] rounded-[99px] bg-primary/10 shadow-[0px_0px_0.5px_rgba(0,0,0,0.12)]" />
         </div>
-      </div>
+      </Tabs>
 
-      {/* Pricing Cards Section */}
-      <div className="flex items-center justify-center self-stretch border-[rgba(55,50,47,0.12)] border-t border-b">
+      <div className="flex items-center justify-center self-stretch border-primary/12 border-t border-b">
         <div className="flex w-full items-start justify-center">
-          {/* Left Decorative Pattern */}
           <div className="relative hidden w-12 self-stretch overflow-hidden md:block">
             <div className="absolute top-[-120px] left-[-58px] flex w-[162px] flex-col items-start justify-start">
               {Array.from({ length: 200 }).map((_, i) => (
@@ -134,24 +109,21 @@ export default function PricingSection() {
             </div>
           </div>
 
-          {/* Pricing Cards Container */}
           <div className="flex flex-1 flex-col items-center justify-center gap-6 py-12 md:flex-row md:py-0">
-            {/* Starter Plan */}
-            <div className="flex max-w-full flex-1 flex-col items-start justify-start gap-12 self-stretch overflow-hidden border border-[#E0DEDB] border-[rgba(50,45,43,0.12)] bg-[rgba(255,255,255,0)] px-6 py-5 md:max-w-none">
-              {/* Plan Header */}
+            <Card className="flex max-w-full flex-1 flex-col items-start justify-start gap-12 self-stretch overflow-hidden rounded-none border border-border border-primary/12 bg-[rgba(255,255,255,0)] px-6 py-5 ring-0 md:max-w-none">
               <div className="flex flex-col items-center justify-start gap-9 self-stretch">
                 <div className="flex flex-col items-start justify-start gap-2 self-stretch">
-                  <div className="font-medium font-sans text-[rgba(55,50,47,0.90)] text-lg leading-7">
+                  <div className="font-medium font-sans text-lg text-primary/90 leading-7">
                     Starter
                   </div>
-                  <div className="w-full max-w-[242px] font-normal font-sans text-[rgba(41,37,35,0.70)] text-sm leading-5">
+                  <div className="w-full max-w-[242px] font-normal font-sans text-foreground/70 text-sm leading-5">
                     Perfect for individuals and small teams getting started.
                   </div>
                 </div>
 
                 <div className="flex flex-col items-start justify-start gap-2 self-stretch">
                   <div className="flex flex-col items-start justify-start gap-1">
-                    <div className="relative flex h-[60px] items-center font-medium font-serif text-5xl text-[#37322F] leading-[60px]">
+                    <div className="relative flex h-[60px] items-center font-medium font-serif text-5xl text-primary leading-[60px]">
                       <span className="invisible">
                         ${pricing.starter[billingPeriod]}
                       </span>
@@ -178,19 +150,18 @@ export default function PricingSection() {
                         ${pricing.starter.monthly}
                       </span>
                     </div>
-                    <div className="font-medium font-sans text-[#847971] text-sm">
+                    <div className="font-medium font-sans text-muted-foreground text-sm">
                       per {billingPeriod === "monthly" ? "month" : "year"}, per
                       user.
                     </div>
                   </div>
                 </div>
 
-                <div className="relative flex items-center justify-center self-stretch overflow-hidden rounded-[99px] bg-[#37322F] px-4 py-[10px] shadow-[0px_2px_4px_rgba(55,50,47,0.12)]">
-                  <div className="absolute top-[-0.5px] left-0 h-[41px] w-full bg-gradient-to-b from-[rgba(255,255,255,0.20)] to-[rgba(0,0,0,0.10)] mix-blend-multiply" />
-                  <div className="flex max-w-[108px] flex-col justify-center font-medium font-sans text-[#FBFAF9] text-[13px] leading-5">
+                <Button className="w-full border-transparent bg-primary px-4 py-[10px] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] hover:bg-primary-hover">
+                  <span className="flex max-w-[108px] flex-col justify-center font-medium font-sans text-[13px] text-primary-foreground leading-5">
                     Start for free
-                  </div>
-                </div>
+                  </span>
+                </Button>
               </div>
 
               <div className="flex flex-col items-start justify-start gap-2 self-stretch">
@@ -222,30 +193,28 @@ export default function PricingSection() {
                         />
                       </svg>
                     </div>
-                    <div className="flex-1 font-normal font-sans text-[12.5px] text-[rgba(55,50,47,0.80)] leading-5">
+                    <div className="flex-1 font-normal font-sans text-[12.5px] text-primary/80 leading-5">
                       {feature}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            {/* Professional Plan (Featured) */}
-            <div className="flex max-w-full flex-1 flex-col items-start justify-start gap-12 self-stretch overflow-hidden border border-[rgba(50,45,43,0.12)] border-[rgba(55,50,47,0.12)] bg-[#37322F] px-6 py-5 md:max-w-none">
-              {/* Plan Header */}
+            <Card className="flex max-w-full flex-1 flex-col items-start justify-start gap-12 self-stretch overflow-hidden rounded-none border border-primary/12 bg-primary px-6 py-5 ring-0 md:max-w-none">
               <div className="flex flex-col items-center justify-start gap-9 self-stretch">
                 <div className="flex flex-col items-start justify-start gap-2 self-stretch">
-                  <div className="font-medium font-sans text-[#FBFAF9] text-lg leading-7">
+                  <div className="font-medium font-sans text-lg text-primary-foreground leading-7">
                     Professional
                   </div>
-                  <div className="w-full max-w-[242px] font-normal font-sans text-[#B2AEA9] text-sm leading-5">
+                  <div className="w-full max-w-[242px] font-normal font-sans text-primary-foreground/70 text-sm leading-5">
                     Advanced features for growing teams and businesses.
                   </div>
                 </div>
 
                 <div className="flex flex-col items-start justify-start gap-2 self-stretch">
                   <div className="flex flex-col items-start justify-start gap-1">
-                    <div className="relative flex h-[60px] items-center font-medium font-serif text-5xl text-[#F0EFEE] leading-[60px]">
+                    <div className="relative flex h-[60px] items-center font-medium font-serif text-5xl text-primary-foreground/95 leading-[60px]">
                       <span className="invisible">
                         ${pricing.professional[billingPeriod]}
                       </span>
@@ -272,20 +241,18 @@ export default function PricingSection() {
                         ${pricing.professional.monthly}
                       </span>
                     </div>
-                    <div className="font-medium font-sans text-[#D2C6BF] text-sm">
+                    <div className="font-medium font-sans text-primary-foreground/80 text-sm">
                       per {billingPeriod === "monthly" ? "month" : "year"}, per
                       user.
                     </div>
                   </div>
                 </div>
 
-                {/* CTA Button */}
-                <div className="relative flex items-center justify-center self-stretch overflow-hidden rounded-[99px] bg-[#FBFAF9] px-4 py-[10px] shadow-[0px_2px_4px_rgba(55,50,47,0.12)]">
-                  <div className="absolute top-[-0.5px] left-0 h-[41px] w-full bg-gradient-to-b from-[rgba(255,255,255,0)] to-[rgba(0,0,0,0.10)] mix-blend-multiply" />
-                  <div className="flex max-w-[108px] flex-col justify-center font-medium font-sans text-[#37322F] text-[13px] leading-5">
+                <Button className="w-full border-transparent bg-primary-foreground px-4 py-[10px] text-primary shadow-[0px_2px_4px_rgba(55,50,47,0.12)] hover:bg-muted">
+                  <span className="flex max-w-[108px] flex-col justify-center font-medium font-sans text-[13px] text-primary leading-5">
                     Get started
-                  </div>
-                </div>
+                  </span>
+                </Button>
               </div>
 
               <div className="flex flex-col items-start justify-start gap-2 self-stretch">
@@ -320,30 +287,28 @@ export default function PricingSection() {
                         />
                       </svg>
                     </div>
-                    <div className="flex-1 font-normal font-sans text-[#F0EFEE] text-[12.5px] leading-5">
+                    <div className="flex-1 font-normal font-sans text-[12.5px] text-primary-foreground/95 leading-5">
                       {feature}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            {/* Enterprise Plan */}
-            <div className="flex max-w-full flex-1 flex-col items-start justify-start gap-12 self-stretch overflow-hidden border border-[#E0DEDB] bg-white px-6 py-5 md:max-w-none">
-              {/* Plan Header */}
+            <Card className="flex max-w-full flex-1 flex-col items-start justify-start gap-12 self-stretch overflow-hidden rounded-none border border-border bg-card px-6 py-5 ring-0 md:max-w-none">
               <div className="flex flex-col items-center justify-start gap-9 self-stretch">
                 <div className="flex flex-col items-start justify-start gap-2 self-stretch">
-                  <div className="font-medium font-sans text-[rgba(55,50,47,0.90)] text-lg leading-7">
+                  <div className="font-medium font-sans text-lg text-primary/90 leading-7">
                     Enterprise
                   </div>
-                  <div className="w-full max-w-[242px] font-normal font-sans text-[rgba(41,37,35,0.70)] text-sm leading-5">
+                  <div className="w-full max-w-[242px] font-normal font-sans text-foreground/70 text-sm leading-5">
                     Complete solution for large organizations and enterprises.
                   </div>
                 </div>
 
                 <div className="flex flex-col items-start justify-start gap-2 self-stretch">
                   <div className="flex flex-col items-start justify-start gap-1">
-                    <div className="relative flex h-[60px] items-center font-medium font-serif text-5xl text-[#37322F] leading-[60px]">
+                    <div className="relative flex h-[60px] items-center font-medium font-serif text-5xl text-primary leading-[60px]">
                       <span className="invisible">
                         ${pricing.enterprise[billingPeriod]}
                       </span>
@@ -370,19 +335,18 @@ export default function PricingSection() {
                         ${pricing.enterprise.monthly}
                       </span>
                     </div>
-                    <div className="font-medium font-sans text-[#847971] text-sm">
+                    <div className="font-medium font-sans text-muted-foreground text-sm">
                       per {billingPeriod === "monthly" ? "month" : "year"}, per
                       user.
                     </div>
                   </div>
                 </div>
 
-                <div className="relative flex items-center justify-center self-stretch overflow-hidden rounded-[99px] bg-[#37322F] px-4 py-[10px] shadow-[0px_2px_4px_rgba(55,50,47,0.12)]">
-                  <div className="absolute top-[-0.5px] left-0 h-[41px] w-full bg-gradient-to-b from-[rgba(255,255,255,0.20)] to-[rgba(0,0,0,0.10)] mix-blend-multiply" />
-                  <div className="flex max-w-[108px] flex-col justify-center font-medium font-sans text-[#FBFAF9] text-[13px] leading-5">
+                <Button className="w-full border-transparent bg-primary px-4 py-[10px] shadow-[0px_2px_4px_rgba(55,50,47,0.12)] hover:bg-primary-hover">
+                  <span className="flex max-w-[108px] flex-col justify-center font-medium font-sans text-[13px] text-primary-foreground leading-5">
                     Contact sales
-                  </div>
-                </div>
+                  </span>
+                </Button>
               </div>
 
               <div className="flex flex-col items-start justify-start gap-2 self-stretch">
@@ -417,16 +381,15 @@ export default function PricingSection() {
                         />
                       </svg>
                     </div>
-                    <div className="flex-1 font-normal font-sans text-[12.5px] text-[rgba(55,50,47,0.80)] leading-5">
+                    <div className="flex-1 font-normal font-sans text-[12.5px] text-primary/80 leading-5">
                       {feature}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
 
-          {/* Right Decorative Pattern */}
           <div className="relative hidden w-12 self-stretch overflow-hidden md:block">
             <div className="absolute top-[-120px] left-[-58px] flex w-[162px] flex-col items-start justify-start">
               {Array.from({ length: 200 }).map((_, i) => (
