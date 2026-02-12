@@ -1,3 +1,45 @@
+export const PRICING_PLANS = {
+  free: {
+    name: "Free",
+    description: "For solo devs and small teams getting started.",
+    pricing: { monthly: 0, annually: 0 },
+    cta: { label: "Start for free", href: "/sign-up" },
+    features: [
+      "2 team members",
+      "15 AI Credits per month",
+      "3 workflows",
+      "2 integrations",
+      "7 Days Log Retention",
+    ],
+  },
+  pro: {
+    name: "Pro",
+    description: "More power for growing teams.",
+    pricing: { monthly: 50, annually: 500 },
+    cta: { label: "Get started", href: "/sign-up" },
+    features: [
+      "5 team members",
+      "Unlimited workflows",
+      "Unlimited integrations",
+      "30 Days Log Retention",
+      "250 AI Credits (then $0.01/credit)",
+    ],
+  },
+  enterprise: {
+    name: "Enterprise",
+    description: "Full control for large teams with custom workflows.",
+    cta: { label: "Contact us", href: "mailto:dominik@usenotra.com" },
+    features: [
+      "Everything in Pro",
+      "Unlimited team members",
+      "Custom integrations",
+      "Unlimited log retention",
+      "Dedicated support",
+      "Custom AI Credit limits",
+    ],
+  },
+} as const;
+
 export const SOCIAL_PROOF_LOGOS = [
   {
     name: "Consent",
