@@ -1,24 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function DocumentationSection() {
   const [activeCard, setActiveCard] = useState(0);
   const [animationKey, setAnimationKey] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const startInterval = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
       setActiveCard((prev) => (prev + 1) % 3);
       setAnimationKey((prev) => prev + 1);
     }, 7000);
-
-    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    startInterval();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [startInterval]);
 
   const handleCardClick = (index: number) => {
     setActiveCard(index);
     setAnimationKey((prev) => prev + 1);
+    startInterval();
   };
 
   return (
