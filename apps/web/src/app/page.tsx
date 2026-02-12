@@ -6,8 +6,8 @@ import Link from "next/link";
 import { ActivityFeed } from "../components/activity-feed";
 import CTASection from "../components/cta-section";
 import DocumentationSection from "../components/documentation-section";
-import EffortlessIntegration from "../components/effortless-integration-updated";
 import FAQSection from "../components/faq-section";
+import IntegrationOrbit from "../components/integration-orbit";
 import NumbersThatSpeak from "../components/numbers-that-speak";
 import PricingSection from "../components/pricing-section";
 import TestimonialsSection from "../components/testimonials-section";
@@ -245,15 +245,8 @@ export default function LandingPage() {
                     You'll be connected in under a minute.
                   </p>
                 </div>
-                <div className="relative flex h-50 w-full items-center justify-center overflow-hidden rounded-lg bg-transparent sm:h-62.5 md:h-75">
-                  <div className="flex h-full w-full items-center justify-center bg-transparent">
-                    <EffortlessIntegration
-                      className="max-h-full max-w-full"
-                      height={250}
-                      width={400}
-                    />
-                  </div>
-                  <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-8 bg-linear-to-t from-background to-transparent" />
+                <div className="relative flex h-50 w-full items-center justify-center overflow-hidden rounded-lg sm:h-62.5 md:h-75">
+                  <IntegrationOrbit className="h-full w-full" />
                 </div>
               </div>
 
