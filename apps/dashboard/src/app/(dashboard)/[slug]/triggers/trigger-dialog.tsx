@@ -322,40 +322,47 @@ export function AddTriggerDialog({
           <ScrollArea className="min-h-0 flex-1">
             <div className="space-y-4 px-4 py-4 pb-6">
               <form.Field name="sourceType">
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>Source</Label>
-                    {isSourceLocked ? (
-                      <Input
-                        disabled
-                        id={field.name}
-                        value={
-                          availableSourceOptions[0]?.label ?? "GitHub webhook"
-                        }
-                      />
-                    ) : (
-                      <Select
-                        onValueChange={(value) => {
-                          if (value) {
-                            field.handleChange(value as Trigger["sourceType"]);
+                {(field) =>
+                  isScheduleContext ? null : (
+                    <div className="space-y-2">
+                      <Label htmlFor={field.name}>Source</Label>
+                      {isSourceLocked ? (
+                        <Input
+                          disabled
+                          id={field.name}
+                          value={
+                            availableSourceOptions[0]?.label ?? "GitHub webhook"
                           }
-                        }}
-                        value={field.state.value}
-                      >
-                        <SelectTrigger className="w-full" id={field.name}>
-                          <SelectValue placeholder="Source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableSourceOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                )}
+                        />
+                      ) : (
+                        <Select
+                          onValueChange={(value) => {
+                            if (value) {
+                              field.handleChange(
+                                value as Trigger["sourceType"]
+                              );
+                            }
+                          }}
+                          value={field.state.value}
+                        >
+                          <SelectTrigger className="w-full" id={field.name}>
+                            <SelectValue placeholder="Source" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableSourceOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  )
+                }
               </form.Field>
 
               <form.Subscribe selector={(state) => state.values.sourceType}>

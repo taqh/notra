@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@notra/ui/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -181,12 +180,6 @@ export function SchedulePicker({ value, onChange }: SchedulePickerProps) {
           </div>
         ) : null}
       </div>
-
-      <Input
-        className="text-xs"
-        disabled
-        value={`Timezone: UTC · ${FREQUENCY_OPTIONS.find((o) => o.value === current.frequency)?.label ?? current.frequency}`}
-      />
     </div>
   );
 }
