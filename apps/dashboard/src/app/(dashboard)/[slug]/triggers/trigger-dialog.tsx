@@ -24,7 +24,6 @@ import {
 } from "@notra/ui/components/ui/select";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -606,7 +605,6 @@ export function AddTriggerDialog({
           </ScrollArea>
 
           <SheetFooter className="shrink-0 border-t bg-background pt-4">
-            <SheetClose render={<Button variant="outline">Cancel</Button>} />
             <form.Subscribe
               selector={(state) => ({
                 canSubmit:

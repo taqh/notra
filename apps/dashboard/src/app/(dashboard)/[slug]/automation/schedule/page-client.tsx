@@ -344,6 +344,9 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
   const triggerToDelete = deleteTriggerId
     ? triggers.find((t) => t.id === deleteTriggerId)
     : null;
+  const deleteTriggerRepositoryNames = triggerToDelete
+    ? triggerToDelete.targets.repositoryIds.map((id) => repositoryMap[id] ?? id)
+    : [];
 
   return (
     <PageContainer className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -497,13 +500,28 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete schedule?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this{" "}
-              {triggerToDelete
-                ? formatFrequency(
-                    triggerToDelete.sourceConfig.cron
-                  ).toLowerCase()
-                : ""}{" "}
-              schedule. This action cannot be undone.
+              This will permanently delete{" "}
+              {triggerToDelete ? (
+                <Tooltip>
+                  <TooltipTrigger className="cursor-help font-medium text-foreground underline decoration-dotted underline-offset-2">
+                    {triggerToDelete.name}
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs" side="top">
+                    <div className="space-y-1 text-xs">
+                      <p>
+                        Runs:{" "}
+                        {formatFrequency(triggerToDelete.sourceConfig.cron)}
+                      </p>
+                      <p>
+                        Repositories: {deleteTriggerRepositoryNames.join(", ")}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                "this schedule"
+              )}
+              . This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -649,7 +667,7 @@ function ScheduleTable({
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger
-                      className="flex size-8 items-center justify-center rounded-md hover:bg-accent disabled:opacity-50"
+                      className="flex size-8 cursor-pointer items-center justify-center rounded-md hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={isThisUpdating || isThisRunning}
                     >
                       {isThisUpdating || isThisRunning ? (
