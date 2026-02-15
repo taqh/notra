@@ -3,7 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
-import { R2_PUBLIC_URL, r2 } from "@/lib/upload/r2";
+import { R2_BUCKET_NAME, R2_PUBLIC_URL, r2 } from "@/lib/upload/r2";
 import { uploadSchema, validateUpload } from "@/schemas/upload";
 
 export async function POST(request: Request) {
@@ -84,6 +84,7 @@ export async function POST(request: Request) {
   const presignedUrl = await getSignedUrl(
     r2,
     new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
       Key: key,
       ContentType: fileType,
       ContentLength: fileSize,
