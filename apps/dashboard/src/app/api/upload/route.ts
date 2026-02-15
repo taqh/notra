@@ -3,6 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
+import { getFileExtension } from "@/lib/upload/mime";
 import { R2_BUCKET_NAME, R2_PUBLIC_URL, r2 } from "@/lib/upload/r2";
 import { uploadSchema, validateUpload } from "@/schemas/upload";
 
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
   }
 
   const id = nanoid();
-  const extension = fileType.split("/")[1];
+  const extension = getFileExtension(fileType);
   const userId = sessionData.user.id;
   const orgId = sessionData.session?.activeOrganizationId;
 

@@ -25,8 +25,8 @@ async function uploadToR2(presignedUrl: string, file: File) {
     },
   });
 
-  if (response.status !== 200) {
-    throw new Error(response.data.error);
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`Upload failed with status ${response.status}`);
   }
 
   return response.data;

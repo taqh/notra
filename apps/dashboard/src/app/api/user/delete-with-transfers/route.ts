@@ -34,6 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const organizationsToCleanup: string[] = [];
+
     for (const transfer of transfers) {
       const { orgId, action } = transfer;
 
@@ -88,16 +90,22 @@ export async function POST(request: NextRequest) {
               )
             );
         } else if (action === "delete") {
-          await deleteOrganizationFiles(orgId).catch((err) => {
-            console.error(
-              `[Delete Org] Failed to cleanup R2 files for ${orgId}:`,
-              err
-            );
-          });
           await tx.delete(organizations).where(eq(organizations.id, orgId));
+          organizationsToCleanup.push(orgId);
         }
       });
     }
+
+    await Promise.all(
+      organizationsToCleanup.map(async (orgId) => {
+        await deleteOrganizationFiles(orgId).catch((err) => {
+          console.error(
+            `[Delete Org] Failed to cleanup R2 files for ${orgId}:`,
+            err
+          );
+        });
+      })
+    );
 
     await deleteUserFiles(user.id).catch((err) => {
       console.error(
