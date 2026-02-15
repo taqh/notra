@@ -216,7 +216,7 @@ export default function GeneralSettingsPage({ params }: PageProps) {
               />
               <button
                 aria-label="Upload organization logo"
-                className="group relative"
+                className="group relative cursor-pointer disabled:cursor-not-allowed"
                 disabled={isUploadingLogo}
                 onClick={() => logoInputRef.current?.click()}
                 type="button"

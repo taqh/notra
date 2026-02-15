@@ -225,7 +225,7 @@ function ProfileSection({ user, onSessionRefetch }: ProfileSectionProps) {
           />
           <button
             aria-label="Upload profile picture"
-            className="group relative"
+            className="group relative cursor-pointer disabled:cursor-not-allowed"
             disabled={isUploadingAvatar}
             onClick={() => fileInputRef.current?.click()}
             type="button"
