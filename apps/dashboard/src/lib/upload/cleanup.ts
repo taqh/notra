@@ -1,5 +1,5 @@
 import { DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { R2_BUCKET_NAME, r2 } from "./r2";
+import { r2 } from "./r2";
 
 const MAX_KEYS_PER_DELETE = 1000;
 
@@ -10,7 +10,6 @@ async function deleteObjectsByPrefix(prefix: string): Promise<number> {
   do {
     const listResult = await r2.send(
       new ListObjectsV2Command({
-        Bucket: R2_BUCKET_NAME,
         Prefix: prefix,
         ContinuationToken: continuationToken,
       })
@@ -30,7 +29,6 @@ async function deleteObjectsByPrefix(prefix: string): Promise<number> {
       for (const chunk of chunks) {
         await r2.send(
           new DeleteObjectsCommand({
-            Bucket: R2_BUCKET_NAME,
             Delete: {
               Objects: chunk.map((Key) => ({ Key })),
               Quiet: true,
