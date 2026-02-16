@@ -52,16 +52,19 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const workflowRunId = await triggerScheduleNow(triggerId);
     const logRetentionDays = await checkLogRetention(organizationId);
 
+    const scheduleName = trigger.name.trim() || trigger.outputType;
+
     await appendWebhookLog({
       organizationId,
       integrationId: triggerId,
       integrationType: "manual",
-      title: `Manual trigger: ${trigger.outputType}`,
+      title: scheduleName,
       status: "success",
       statusCode: 200,
       referenceId: workflowRunId,
       payload: {
         triggerId,
+        scheduleName,
         sourceType: trigger.sourceType,
         outputType: trigger.outputType,
         workflowRunId,
