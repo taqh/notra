@@ -7,17 +7,7 @@ import { Marble } from "@notra/ui/components/ui/svgs/marble";
 import { Slack } from "@notra/ui/components/ui/svgs/slack";
 import { Webflow } from "@notra/ui/components/ui/svgs/webflow";
 import type { IntegrationType } from "@/schemas/integrations";
-
-export interface IntegrationConfig {
-  id: IntegrationType;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  accentColor: string;
-  href: string;
-  available: boolean;
-  category: "input" | "output";
-}
+import type { IntegrationConfig } from "@/types/lib/integrations/catalog";
 
 export const INPUT_SOURCES: readonly IntegrationConfig[] = [
   {

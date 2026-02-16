@@ -14,3 +14,13 @@ export interface UploadPresignedResponse {
   /** Public URL to access the file after upload */
   publicUrl: string;
 }
+
+export interface UploadFileResponse {
+  url: string;
+  key: string;
+}
+
+export interface UploadFileProps {
+  file: File;
+  type: UploadType;
+}

@@ -11,7 +11,7 @@ import type {
   RepoContext,
   ToolSet,
   ValidatedIntegration,
-} from "@/types/ai/orchestration";
+} from "@/types/lib/ai/orchestration";
 
 export function buildToolSet(params: BuildToolSetParams): ToolSet {
   const {

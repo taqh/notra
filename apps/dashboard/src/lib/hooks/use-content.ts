@@ -1,12 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ContentResponse } from "@/schemas/content";
+import type { ContentApiResponse } from "@/types/lib/hooks/content";
 import { QUERY_KEYS } from "@/utils/query-keys";
-
-interface ContentApiResponse {
-  content: ContentResponse;
-}
 
 export function useContent(organizationId: string, contentId: string) {
   return useQuery({

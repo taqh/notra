@@ -3,7 +3,7 @@ import { R2_BUCKET_NAME, r2 } from "./r2";
 
 const MAX_KEYS_PER_DELETE = 1000;
 
-async function deleteObjectsByPrefix(prefix: string): Promise<number> {
+async function deleteObjectsByPrefix(prefix: string) {
   let totalDeleted = 0;
   let continuationToken: string | undefined;
 
@@ -47,7 +47,7 @@ async function deleteObjectsByPrefix(prefix: string): Promise<number> {
   return totalDeleted;
 }
 
-export async function deleteUserFiles(userId: string): Promise<number> {
+export async function deleteUserFiles(userId: string) {
   const prefix = `user/${userId}/`;
   try {
     const deleted = await deleteObjectsByPrefix(prefix);
@@ -66,9 +66,7 @@ export async function deleteUserFiles(userId: string): Promise<number> {
   }
 }
 
-export async function deleteOrganizationFiles(
-  organizationId: string
-): Promise<number> {
+export async function deleteOrganizationFiles(organizationId: string) {
   const prefix = `organization/${organizationId}/`;
   try {
     const deleted = await deleteObjectsByPrefix(prefix);

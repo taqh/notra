@@ -10,7 +10,7 @@ import { getContentEditorChatPrompt } from "@/lib/ai/prompts/content-editor";
 import type {
   OrchestrateInput,
   OrchestrateResult,
-} from "@/types/ai/orchestration";
+} from "@/types/lib/ai/orchestration";
 import {
   hasEnabledGitHubIntegration,
   validateIntegrations,

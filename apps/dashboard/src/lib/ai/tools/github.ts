@@ -5,7 +5,7 @@ import { getTokenForRepository } from "@/lib/services/github-integration";
 import type {
   ErrorWithStatus,
   GitHubToolsAccessConfig,
-} from "@/types/ai/tools";
+} from "@/types/lib/ai/tools";
 import { toolDescription } from "@/utils/ai/description";
 import { getAICachedTools } from "./tool-cache";
 

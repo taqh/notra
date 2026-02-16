@@ -1,5 +1,10 @@
 import axios from "axios";
-import type { UploadPresignedResponse, UploadType } from "@/types/upload";
+import type {
+  UploadFileProps,
+  UploadFileResponse,
+  UploadPresignedResponse,
+  UploadType,
+} from "@/types/lib/upload/client";
 
 async function getPresignedUrl(
   file: File,
@@ -35,10 +40,7 @@ async function uploadToR2(presignedUrl: string, file: File) {
 export async function uploadFile({
   file,
   type,
-}: {
-  file: File;
-  type: UploadType;
-}): Promise<{ url: string; key: string }> {
+}: UploadFileProps): Promise<UploadFileResponse> {
   try {
     const response = await getPresignedUrl(file, type);
 

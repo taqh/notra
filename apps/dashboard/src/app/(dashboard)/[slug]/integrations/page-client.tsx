@@ -23,15 +23,15 @@ import { memo, useMemo, useState } from "react";
 import { InstalledIntegrationCard } from "@/components/integrations-card";
 import { PageContainer } from "@/components/layout/container";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
-import type { IntegrationConfig } from "@/lib/integrations/catalog";
 import {
   ALL_INTEGRATIONS,
   INPUT_SOURCES,
   INTEGRATION_CATEGORY_MAP,
   OUTPUT_SOURCES,
 } from "@/lib/integrations/catalog";
-import type { IntegrationsResponse } from "@/lib/services/integrations";
 import type { IntegrationType } from "@/schemas/integrations";
+import type { IntegrationConfig } from "@/types/lib/integrations/catalog";
+import type { IntegrationsResponse } from "@/types/lib/services/integrations";
 import { QUERY_KEYS } from "@/utils/query-keys";
 import { IntegrationsPageSkeleton } from "./skeleton";
 

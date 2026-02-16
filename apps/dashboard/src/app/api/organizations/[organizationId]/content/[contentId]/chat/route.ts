@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 import { orchestrateChat } from "@/lib/ai/orchestration/orchestrate";
 import { withOrganizationAuth } from "@/lib/auth/organization";
 import { autumn } from "@/lib/billing/autumn";
-import { FEATURES } from "@/lib/billing/constants";
 import { chatRequestSchema } from "@/schemas/content";
+import { FEATURES } from "@/utils/constants";
 
 interface RouteContext {
   params: Promise<{ organizationId: string; contentId: string }>;

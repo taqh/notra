@@ -1,4 +1,5 @@
-import * as z from "zod";
+import z from "zod";
+import type { UploadType } from "@/types/lib/upload/client";
 import {
   ALLOWED_MIME_TYPES,
   ALLOWED_RASTER_MIME_TYPES,
@@ -7,8 +8,7 @@ import {
   MAX_AVATAR_FILE_SIZE,
   MAX_CONTENT_FILE_SIZE,
   MAX_LOGO_FILE_SIZE,
-} from "@/lib/constants";
-import type { UploadType } from "@/types/upload";
+} from "@/utils/constants";
 
 export const uploadAvatarSchema = z.object({
   type: z.literal("avatar"),
