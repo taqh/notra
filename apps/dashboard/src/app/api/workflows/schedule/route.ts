@@ -366,7 +366,7 @@ export const { POST } = serve<SchedulePayload>(
             const { error } = await autumnClient.track({
               customer_id: trigger.organizationId,
               feature_id: FEATURES.AI_CREDITS,
-              value: -1,
+              value: 0,
             });
 
             if (error) {
@@ -471,7 +471,7 @@ export const { POST } = serve<SchedulePayload>(
           const { error: refundError } = await autumnClient.track({
             customer_id: trigger.organizationId,
             feature_id: FEATURES.AI_CREDITS,
-            value: -1,
+            value: 0,
           });
 
           if (refundError) {

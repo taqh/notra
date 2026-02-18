@@ -131,7 +131,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         await autumn.track({
           customer_id: organizationId,
           feature_id: FEATURES.AI_CREDITS,
-          value: -1,
+          value: 0,
         });
         console.log("[Autumn] Usage compensated after orchestration failure:", {
           requestId,
