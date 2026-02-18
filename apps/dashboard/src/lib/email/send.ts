@@ -233,6 +233,7 @@ export async function sendScheduledContentCreatedEmail(
     contentTitle,
     contentType,
     contentLink,
+    organizationSlug,
     subject,
   }: SendScheduledContentCreatedEmailProps
 ) {
@@ -245,6 +246,7 @@ export async function sendScheduledContentCreatedEmail(
       subject: subject ?? `Your ${scheduleName} schedule created new content`,
       react: ScheduledContentCreatedEmail({
         organizationName,
+        organizationSlug,
         scheduleName,
         contentTitle,
         contentType,

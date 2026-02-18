@@ -531,6 +531,7 @@ export const { POST } = serve<SchedulePayload>(
                 contentTitle: content.title,
                 contentType: trigger.outputType,
                 contentLink,
+                organizationSlug: notificationData.organizationSlug,
                 subject,
               }).then((result) => {
                 if (result.error) {

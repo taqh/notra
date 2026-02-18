@@ -22,6 +22,7 @@ interface ScheduledContentCreatedEmailProps {
   contentTitle: string;
   contentType: string;
   contentLink: string;
+  organizationSlug: string;
 }
 
 export const ScheduledContentCreatedEmail = ({
@@ -29,7 +30,8 @@ export const ScheduledContentCreatedEmail = ({
   scheduleName = "Weekly Product Updates",
   contentTitle = "This week's product updates are live",
   contentType = "changelog",
-  contentLink = "https://app.usenotra.com/acme/content/example-post-id",
+  organizationSlug = "acme",
+  contentLink = `https://app.usenotra.com/${organizationSlug}/content/example-post-id`,
 }: ScheduledContentCreatedEmailProps) => {
   const logoUrl = EMAIL_CONFIG.getLogoUrl();
 
@@ -60,9 +62,9 @@ export const ScheduledContentCreatedEmail = ({
               <strong>{contentType}</strong> draft.
             </Text>
 
-            <Section className="mt-8 rounded-[8px] border border-[#eaeaea] px-4 py-3">
+            <Section className="mt-8">
               <Text className="m-0 text-[#666666] text-[12px] uppercase tracking-wide">
-                Content title
+                Content title:
               </Text>
               <Text className="mt-2 mb-0 text-[14px] text-black leading-[22px]">
                 {contentTitle}
@@ -77,6 +79,18 @@ export const ScheduledContentCreatedEmail = ({
               If the button does not work, copy and paste this URL into your
               browser: <Link href={contentLink}>{contentLink}</Link>
             </Text>
+
+            <Section className="mt-8">
+              <Text className="m-0 text-center text-[#666666] text-[12px] uppercase tracking-wide">
+                If you don't want to receive these emails, you can click{" "}
+                <Link
+                  href={`${EMAIL_CONFIG.getAppUrl()}/${organizationSlug}/settings/notifications`}
+                >
+                  here
+                </Link>{" "}
+                to update your notification settings.
+              </Text>
+            </Section>
 
             <EmailFooter />
           </Container>

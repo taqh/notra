@@ -15,6 +15,7 @@ export interface SendInviteEmailProps {
 export interface SendScheduledContentCreatedEmailProps {
   recipientEmail: string;
   organizationName: string;
+  organizationSlug: string;
   scheduleName: string;
   contentTitle: string;
   contentType: string;
