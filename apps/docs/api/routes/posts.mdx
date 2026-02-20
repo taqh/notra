@@ -37,7 +37,7 @@ By default, only published posts are returned.
 
 ```bash
 curl -H "Authorization: Bearer YOUR_API_KEY" \
-  "https://api.usenotra.com/v1/YOUR_ORGANIZATION_ID/posts/?sort=desc&limit=10&page=1&status=published"
+  "https://api.usenotra.com/v1/YOUR_ORGANIZATION_ID/posts/?sort=desc&limit=10&page=1&status=draft"
 ```
 
 <ResponseExample>
@@ -45,27 +45,41 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
 {
   "posts": [
     {
-      "id": "YOUR_POST_ID",
-      "title": "February 12-19, 2026 Release",
-      "content": "<p>This week brought meaningful improvements to organization management, scheduling, and mobile responsiveness.</p><h2>Highlights</h2><h3>Organization membership unification with server validation</h3><p>Leave and delete operations now use consistent, validated server logic with atomic operations to prevent race conditions on concurrent requests.</p>",
-      "markdown": "This week brought meaningful improvements to organization management, scheduling, and mobile responsiveness.\n\n## Highlights\n\n### Organization membership unification with server validation\nLeave and delete operations now use consistent, validated server logic with atomic operations to prevent race conditions on concurrent requests.",
+      "id": "6qgag76kdqso3tnr",
+      "title": "Notra Updates February 13-20",
+      "content": "<p>This week brought significant improvements to the platform's core capabilities.</p>",
+      "markdown": "This week brought significant improvements to the platform's core capabilities.",
       "contentType": "changelog",
-      "sourceMetadata": null,
-      "status": "published",
-      "createdAt": "2026-02-19T11:32:54.082Z",
-      "updatedAt": "2026-02-19T11:32:54.082Z"
+      "sourceMetadata": {
+        "triggerId": "v70sdsfbjwqcm48o",
+        "repositories": [
+          {
+            "repo": "notra",
+            "owner": "usenotra"
+          }
+        ],
+        "lookbackRange": {
+          "end": "2026-02-20T09:00:10.575Z",
+          "start": "2026-02-13T09:00:10.575Z"
+        },
+        "lookbackWindow": "last_7_days",
+        "triggerSourceType": "cron"
+      },
+      "status": "draft",
+      "createdAt": "2026-02-20T09:00:41.790Z",
+      "updatedAt": "2026-02-20T09:00:41.790Z"
     }
   ],
   "pagination": {
     "limit": 10,
     "currentPage": 1,
-    "nextPage": null,
+    "nextPage": 2,
     "previousPage": null,
-    "totalPages": 1,
-    "totalItems": 1
+    "totalPages": 4,
+    "totalItems": 32
   },
   "metadata": {
-    "status": ["published"]
+    "status": ["draft"]
   }
 }
 ```
