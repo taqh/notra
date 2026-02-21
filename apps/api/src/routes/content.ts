@@ -89,9 +89,6 @@ contentRoutes.get("/:organizationId/posts", async (c) => {
       totalPages,
       totalItems,
     },
-    metadata: {
-      status,
-    },
   });
 });
 
@@ -149,8 +146,5 @@ contentRoutes.get("/:organizationId/posts/:postId", async (c) => {
 
   return c.json({
     post,
-    metadata: {
-      status,
-    },
   });
 });
