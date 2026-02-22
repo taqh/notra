@@ -50,7 +50,6 @@ const openApiStatusFilterSchema = z
   .openapi({
     description:
       "Filter by status. Repeat the query param to pass multiple values.",
-    example: ["published"],
   });
 
 export const getPostsOpenApiQuerySchema = z.object({
