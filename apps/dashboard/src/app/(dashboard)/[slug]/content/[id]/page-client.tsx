@@ -703,7 +703,7 @@ export default function PageClient({
                       <p className="mb-1 text-muted-foreground text-xs">
                         Original
                       </p>
-                      <p className="break-words rounded bg-red-500/10 px-2 py-1">
+                      <p className="wrap-break-word rounded bg-red-500/10 px-2 py-1">
                         {serverTitle}
                       </p>
                     </div>
@@ -711,7 +711,7 @@ export default function PageClient({
                       <p className="mb-1 text-muted-foreground text-xs">
                         Current
                       </p>
-                      <p className="break-words rounded bg-green-500/10 px-2 py-1">
+                      <p className="wrap-break-word rounded bg-green-500/10 px-2 py-1">
                         {title}
                       </p>
                     </div>
