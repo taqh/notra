@@ -67,7 +67,7 @@ export function DeleteIntegrationDialog({
 
         {isLoadingSchedules && (
           <div className="text-muted-foreground text-sm">
-            Checking for affected schedules...
+            Checking for affected schedules…
           </div>
         )}
 
@@ -89,7 +89,7 @@ export function DeleteIntegrationDialog({
               ))}
               {affectedSchedules.length > 3 && (
                 <p className="text-muted-foreground text-xs">
-                  and {affectedSchedules.length - 3} more...
+                  and {affectedSchedules.length - 3} more…
                 </p>
               )}
             </div>
@@ -128,7 +128,7 @@ export function DeleteIntegrationDialog({
             type="button"
             variant="destructive"
           >
-            {isDeleting ? "Deleting..." : "Delete integration"}
+            {isDeleting ? "Deleting…" : "Delete integration"}
           </ResponsiveAlertDialogAction>
         </ResponsiveAlertDialogFooter>
       </ResponsiveAlertDialogContent>
