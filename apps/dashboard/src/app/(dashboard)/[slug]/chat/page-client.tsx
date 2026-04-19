@@ -21,9 +21,9 @@ import {
   isToolUIPart,
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai";
+import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import type { CSSProperties } from "react";
 import {
   useCallback,
   useEffect,
@@ -660,27 +660,13 @@ function StandaloneChatPageClient({
     );
   }, []);
 
-  const runWithViewTransition = useCallback((update: () => void) => {
-    const doc = document as Document & {
-      startViewTransition?: (cb: () => void) => unknown;
-    };
-    if (typeof doc.startViewTransition === "function") {
-      doc.startViewTransition(update);
-      return;
-    }
-    update();
+  const handleStartEditMessage = useCallback((messageId: string) => {
+    setEditingMessageId(messageId);
   }, []);
 
-  const handleStartEditMessage = useCallback(
-    (messageId: string) => {
-      runWithViewTransition(() => setEditingMessageId(messageId));
-    },
-    [runWithViewTransition]
-  );
-
   const handleCancelEditMessage = useCallback(() => {
-    runWithViewTransition(() => setEditingMessageId(null));
-  }, [runWithViewTransition]);
+    setEditingMessageId(null);
+  }, []);
 
   const resendFromUserMessage = useCallback(
     async (userMessageId: string, text: string, modelOverride?: string) => {
@@ -1203,29 +1189,70 @@ function StandaloneChatPageClient({
                       from={message.role}
                       key={branchFadeKey}
                     >
-                      {isEditing ? (
-                        <UserMessageEditor
-                          initialText={toDisplayText(
-                            extractUserMessageText(message)
+                      {isUser ? (
+                        <AnimatePresence initial={false} mode="wait">
+                          {isEditing ? (
+                            <motion.div
+                              animate={{
+                                opacity: 1,
+                                filter: "blur(0px)",
+                                y: 0,
+                              }}
+                              className="ml-auto w-full"
+                              exit={{
+                                opacity: 0,
+                                filter: "blur(4px)",
+                                y: -2,
+                              }}
+                              initial={{
+                                opacity: 0,
+                                filter: "blur(4px)",
+                                y: 4,
+                              }}
+                              key="editor"
+                              transition={{ duration: 0.2, ease: "easeOut" }}
+                            >
+                              <UserMessageEditor
+                                initialText={toDisplayText(
+                                  extractUserMessageText(message)
+                                )}
+                                onCancel={handleCancelEditMessage}
+                                onSubmit={(text) =>
+                                  handleEditMessage(message.id, text)
+                                }
+                              />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              animate={{
+                                opacity: 1,
+                                filter: "blur(0px)",
+                                y: 0,
+                              }}
+                              className="ml-auto flex w-fit max-w-full"
+                              exit={{
+                                opacity: 0,
+                                filter: "blur(4px)",
+                                y: -2,
+                              }}
+                              initial={{
+                                opacity: 0,
+                                filter: "blur(4px)",
+                                y: 4,
+                              }}
+                              key="content"
+                              transition={{ duration: 0.2, ease: "easeOut" }}
+                            >
+                              <MessageContent>
+                                {message.parts.map((part, index) =>
+                                  renderPart(part, message.id, index)
+                                )}
+                              </MessageContent>
+                            </motion.div>
                           )}
-                          onCancel={handleCancelEditMessage}
-                          onSubmit={(text) =>
-                            handleEditMessage(message.id, text)
-                          }
-                          viewTransitionName={
-                            isUser ? `msg-edit-${message.id}` : undefined
-                          }
-                        />
+                        </AnimatePresence>
                       ) : (
-                        <MessageContent
-                          style={
-                            isUser
-                              ? ({
-                                  viewTransitionName: `msg-edit-${message.id}`,
-                                } as CSSProperties)
-                              : undefined
-                          }
-                        >
+                        <MessageContent>
                           {message.parts.map((part, index) =>
                             renderPart(part, message.id, index)
                           )}

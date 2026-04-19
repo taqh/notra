@@ -6,7 +6,7 @@ import {
   CheckmarkCircle02Icon,
   Copy01Icon,
   Edit02Icon,
-  ReloadIcon,
+  RefreshIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@notra/ui/components/ui/button";
@@ -24,7 +24,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@notra/ui/components/ui/tooltip";
-import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AVAILABLE_MODELS, ModelIcon } from "@/components/chat/chat-input";
 
@@ -50,6 +49,7 @@ export function UserMessageActions({
   onNextBranch,
 }: UserMessageActionsProps) {
   const [copied, setCopied] = useState(false);
+  const [retryOpen, setRetryOpen] = useState(false);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -67,7 +67,10 @@ export function UserMessageActions({
     branchTotal > 1;
 
   return (
-    <div className="mt-1 ml-auto flex items-center text-muted-foreground opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+    <div
+      className="mt-1 ml-auto flex items-center text-muted-foreground opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100 data-[force-visible=true]:opacity-100"
+      data-force-visible={retryOpen || undefined}
+    >
       {hasBranches && (
         <div className="flex items-center text-xs tabular-nums">
           <Button
@@ -99,7 +102,7 @@ export function UserMessageActions({
       )}
 
       <div className="flex items-center">
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={setRetryOpen} open={retryOpen}>
           <Tooltip>
             <TooltipTrigger
               render={
@@ -117,13 +120,13 @@ export function UserMessageActions({
                 />
               }
             >
-              <HugeiconsIcon icon={ReloadIcon} size={14} />
+              <HugeiconsIcon icon={RefreshIcon} size={14} />
             </TooltipTrigger>
             <TooltipContent>Retry</TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuItem onClick={() => onRetry()}>
-              <HugeiconsIcon icon={ReloadIcon} size={14} />
+              <HugeiconsIcon icon={RefreshIcon} size={14} />
               <span className="text-sm">Retry with same</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -195,14 +198,12 @@ interface UserMessageEditorProps {
   initialText: string;
   onCancel: () => void;
   onSubmit: (text: string) => void;
-  viewTransitionName?: string;
 }
 
 export function UserMessageEditor({
   initialText,
   onCancel,
   onSubmit,
-  viewTransitionName,
 }: UserMessageEditorProps) {
   const [value, setValue] = useState(initialText);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -235,14 +236,7 @@ export function UserMessageEditor({
   };
 
   return (
-    <div
-      className="ml-auto flex w-full flex-col gap-2 rounded-lg bg-secondary px-4 py-3"
-      style={
-        viewTransitionName
-          ? ({ viewTransitionName } as CSSProperties)
-          : undefined
-      }
-    >
+    <div className="ml-auto flex w-full flex-col gap-2 rounded-lg bg-secondary px-4 py-3">
       <textarea
         className="wrap-break-word max-h-80 min-h-6 w-full resize-none bg-transparent text-foreground text-sm leading-6 outline-none placeholder:text-muted-foreground"
         onChange={(e) => setValue(e.target.value)}
