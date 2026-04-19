@@ -21,7 +21,6 @@ import {
   isToolUIPart,
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai";
-import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -210,7 +209,9 @@ function StandaloneChatPageClient({
   const [pendingMessageId, setPendingMessageId] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  const [generatedChatId, setGeneratedChatId] = useState(() => nanoid(16));
+  const [generatedChatId, setGeneratedChatId] = useState(() =>
+    crypto.randomUUID()
+  );
   const stableChatId = initialChatId ?? generatedChatId;
 
   const [context, setContext] = useState<ContextItem[]>([]);
@@ -644,7 +645,7 @@ function StandaloneChatPageClient({
     setWasStoppedByUser(false);
     setPendingMessageId(null);
     setChatError(null);
-    setGeneratedChatId(nanoid(16));
+    setGeneratedChatId(crypto.randomUUID());
   }, [pathname, organizationSlug, initialChatId, setMessages]);
 
   const handleSend = useCallback(
