@@ -173,6 +173,7 @@ function ChatReasoningBlock({
 interface PageClientProps {
   organizationSlug: string;
   chatId?: string;
+  initialQuery?: string;
 }
 
 const CREATE_TOOL_TYPES = {
@@ -196,6 +197,7 @@ function getCreateToolContentType(
 function StandaloneChatPageClient({
   organizationSlug,
   chatId: initialChatId,
+  initialQuery,
 }: PageClientProps) {
   const { getOrganization, activeOrganization } = useOrganizationsContext();
   const orgFromList = getOrganization(organizationSlug);
@@ -937,6 +939,7 @@ function StandaloneChatPageClient({
             <ChatInputAdvanced
               context={context}
               error={chatError}
+              initialValue={initialQuery}
               isLoading={isLoading}
               isStopping={isStopping}
               model={selectedModel}
@@ -1030,6 +1033,7 @@ function StandaloneChatPageClient({
               <ChatInputAdvanced
                 context={context}
                 error={chatError}
+                initialValue={initialQuery}
                 isLoading={isLoading}
                 isStopping={isStopping}
                 model={selectedModel}
