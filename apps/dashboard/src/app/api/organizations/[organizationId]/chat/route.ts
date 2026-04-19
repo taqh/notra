@@ -484,6 +484,8 @@ async function createDirectStandaloneChatResponse({
             finishedAt: Date.now(),
             partUsage: part.totalUsage,
             usageSnapshot,
+            model: routingDecision.model,
+            thinkingLevel: enableThinking === false ? "off" : thinkingLevel,
           });
         }
 
