@@ -39,6 +39,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@notra/ui/components/ui/sidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -63,6 +64,8 @@ export function ChatHistoryNav() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const aiChatExperiment = useAiChatExperiment();
+  const { state: sidebarState, isMobile } = useSidebar();
+  const isCollapsed = sidebarState === "collapsed" && !isMobile;
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
@@ -353,22 +356,24 @@ export function ChatHistoryNav() {
         </SidebarGroupContent>
       </SidebarGroup>
 
-      <div className="flex-1 overflow-y-auto">
-        <AnimatePresence initial={false}>
-          {!isLoading && (
-            <motion.div
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0 }}
-              key="chat-sessions"
-              transition={{ duration: 0.25, ease: "easeOut" }}
-            >
-              {renderSessions("Pinned", pinnedSessions)}
-              {renderSessions("Recents", recentSessions)}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {!isCollapsed && (
+        <div className="flex-1 overflow-y-auto">
+          <AnimatePresence initial={false}>
+            {!isLoading && (
+              <motion.div
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0 }}
+                key="chat-sessions"
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              >
+                {renderSessions("Pinned", pinnedSessions)}
+                {renderSessions("Recents", recentSessions)}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       <ResponsiveAlertDialog
         onOpenChange={(open) => {
