@@ -46,14 +46,14 @@ export function ChatSuggestions({ onSelect, disabled }: ChatSuggestionsProps) {
     <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-4">
       {SUGGESTIONS.map((suggestion) => (
         <button
-          className="flex cursor-pointer flex-col items-start gap-2 rounded-[14px] border bg-background p-3 text-left transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex cursor-pointer items-center gap-2 rounded-[0.875rem] border bg-background p-3 text-left transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60"
           disabled={disabled}
           key={suggestion.outputType}
           onClick={() => onSelect(suggestion.prompt)}
           type="button"
         >
           <OutputTypeIcon
-            className="size-4 text-muted-foreground"
+            className="size-4 shrink-0 text-muted-foreground"
             outputType={suggestion.outputType}
           />
           <span className="font-medium text-sm">{suggestion.label}</span>
