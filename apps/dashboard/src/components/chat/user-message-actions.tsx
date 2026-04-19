@@ -68,35 +68,35 @@ export function UserMessageActions({
 
   return (
     <div
-      className="mt-1 ml-auto flex items-center text-muted-foreground opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100 data-[force-visible=true]:opacity-100"
+      className="mt-1.5 ml-auto flex items-center gap-1 text-muted-foreground opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100 data-[force-visible=true]:opacity-100"
       data-force-visible={retryOpen || undefined}
     >
       {hasBranches && (
         <div className="flex items-center text-xs tabular-nums">
           <Button
             aria-label="Previous version"
-            className="size-7"
+            className="size-5"
             disabled={!canInteract}
             onClick={onPreviousBranch}
             size="icon-sm"
             type="button"
             variant="ghost"
           >
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={12} />
           </Button>
           <span className="px-0.5 text-[11px]">
             {(branchIndex ?? 0) + 1}/{branchTotal}
           </span>
           <Button
             aria-label="Next version"
-            className="size-7"
+            className="size-5"
             disabled={!canInteract}
             onClick={onNextBranch}
             size="icon-sm"
             type="button"
             variant="ghost"
           >
-            <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
+            <HugeiconsIcon icon={ArrowRight01Icon} size={12} />
           </Button>
         </div>
       )}
@@ -111,7 +111,7 @@ export function UserMessageActions({
                   render={
                     <Button
                       aria-label="Retry"
-                      className="size-7"
+                      className="size-5"
                       size="icon-sm"
                       type="button"
                       variant="ghost"
@@ -120,13 +120,13 @@ export function UserMessageActions({
                 />
               }
             >
-              <HugeiconsIcon icon={RefreshIcon} size={14} />
+              <HugeiconsIcon icon={RefreshIcon} size={12} />
             </TooltipTrigger>
             <TooltipContent>Retry</TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuItem onClick={() => onRetry()}>
-              <HugeiconsIcon icon={RefreshIcon} size={14} />
+              <HugeiconsIcon icon={RefreshIcon} size={12} />
               <span className="text-sm">Retry with same</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -155,7 +155,7 @@ export function UserMessageActions({
             render={
               <Button
                 aria-label="Edit message"
-                className="size-7"
+                className="size-5"
                 disabled={!canInteract}
                 onClick={onEdit}
                 size="icon-sm"
@@ -164,7 +164,7 @@ export function UserMessageActions({
               />
             }
           >
-            <HugeiconsIcon icon={Edit02Icon} size={14} />
+            <HugeiconsIcon icon={Edit02Icon} size={12} />
           </TooltipTrigger>
           <TooltipContent>Edit</TooltipContent>
         </Tooltip>
@@ -174,7 +174,7 @@ export function UserMessageActions({
             render={
               <Button
                 aria-label="Copy message"
-                className="size-7"
+                className="size-5"
                 onClick={handleCopy}
                 size="icon-sm"
                 type="button"
@@ -184,7 +184,7 @@ export function UserMessageActions({
           >
             <HugeiconsIcon
               icon={copied ? CheckmarkCircle02Icon : Copy01Icon}
-              size={14}
+              size={12}
             />
           </TooltipTrigger>
           <TooltipContent>{copied ? "Copied" : "Copy"}</TooltipContent>
