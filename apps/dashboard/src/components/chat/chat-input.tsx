@@ -227,6 +227,7 @@ function contextItemsEqual(a: ContextItem, b: ContextItem): boolean {
 interface ChatInputAdvancedProps {
   onSend?: (value: string) => void;
   onStop?: () => void;
+  initialValue?: string;
   isLoading?: boolean;
   isStopping?: boolean;
   organizationSlug?: string;
@@ -256,6 +257,7 @@ const THINKING_LABELS: Record<ThinkingLevel, string> = {
 export function ChatInputAdvanced({
   onSend,
   onStop,
+  initialValue,
   isLoading = false,
   isStopping = false,
   organizationSlug,
@@ -283,6 +285,7 @@ export function ChatInputAdvanced({
   const mentionAnchorRef = useRef<{ node: Node; offset: number } | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const mentionListRef = useRef<HTMLDivElement | null>(null);
+  const lastInitialValueRef = useRef<string | undefined>(undefined);
   const contextRef = useRef(context);
   contextRef.current = context;
   const { check, data: customer } = useCustomer();
@@ -554,6 +557,36 @@ export function ChatInputAdvanced({
     setMentionQuery(null);
     syncContextFromDOM();
   }, [readEditorText, syncContextFromDOM]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || initialValue === lastInitialValueRef.current) {
+      return;
+    }
+
+    lastInitialValueRef.current = initialValue;
+    editor.replaceChildren();
+
+    if (initialValue) {
+      editor.append(document.createTextNode(initialValue));
+    }
+
+    setIsEmpty(!(initialValue?.trim().length ?? 0));
+    setMentionQuery(null);
+    mentionAnchorRef.current = null;
+
+    if (!initialValue) {
+      return;
+    }
+
+    editor.focus();
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }, [initialValue]);
 
   const insertMention = useCallback(
     (item: MentionItem) => {

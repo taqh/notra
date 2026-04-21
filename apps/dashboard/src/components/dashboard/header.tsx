@@ -1,5 +1,9 @@
 import { getCalApi } from "@calcom/embed-react";
-import { ArrowRight01Icon, Calendar03Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowRight01Icon,
+  Calendar03Icon,
+  SearchIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Breadcrumb,
@@ -17,6 +21,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef } from "react";
 import { CreditBalanceButton } from "@/components/billing/credit-balance-button";
+import { useCommandPalette } from "@/components/command-palette/command-palette-context";
 import { ChatTopbarTitle } from "@/components/dashboard/chat-topbar-title";
 
 const NON_ORG_PATHS: string[] = [];
@@ -31,6 +36,7 @@ export function SiteHeader() {
   const router = useRouter();
   const id = useId();
   const segments = pathname.split("/").filter(Boolean);
+  const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const slug = segments[0];
   const isInSettings = segments[1] === "settings";
   const preSettingsPathsRef = useRef<Record<string, string>>({});
@@ -155,6 +161,18 @@ export function SiteHeader() {
           <BreadcrumbList>{breadcrumbs}</BreadcrumbList>
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
+          <Button
+            className="hidden h-8 items-center gap-2 border-dashed pr-1.5 pl-2 text-muted-foreground hover:text-foreground sm:flex"
+            onClick={() => setCommandPaletteOpen(true)}
+            size="sm"
+            variant="outline"
+          >
+            <HugeiconsIcon icon={SearchIcon} size={14} strokeWidth={2} />
+            <span className="text-xs">Search</span>
+            <kbd className="pointer-events-none ml-2 select-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+              ⌘K
+            </kbd>
+          </Button>
           <CreditBalanceButton />
           <Button
             className="gap-1.5"

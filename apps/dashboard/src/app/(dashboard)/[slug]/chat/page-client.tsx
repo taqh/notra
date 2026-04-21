@@ -25,6 +25,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
+import { parseAsString, useQueryState } from "nuqs";
 import {
   useCallback,
   useEffect,
@@ -230,6 +231,10 @@ function StandaloneChatPageClient({
   organizationSlug,
   chatId: initialChatId,
 }: PageClientProps) {
+  const [initialQuery, setInitialQuery] = useQueryState(
+    "q",
+    parseAsString.withOptions({ history: "replace" })
+  );
   const { getOrganization, activeOrganization } = useOrganizationsContext();
   const orgFromList = getOrganization(organizationSlug);
   const organization =
@@ -946,6 +951,36 @@ function StandaloneChatPageClient({
     [dispatchMessage, isLoading]
   );
 
+  const autoSubmittedRef = useRef(false);
+  useEffect(() => {
+    if (autoSubmittedRef.current) {
+      return;
+    }
+    if (initialChatId) {
+      return;
+    }
+    const trimmedInitialQuery = initialQuery?.trim();
+    if (!trimmedInitialQuery) {
+      return;
+    }
+    if (!organizationId) {
+      return;
+    }
+    if (messagesRef.current.length > 0) {
+      return;
+    }
+
+    autoSubmittedRef.current = true;
+    setInitialQuery(null);
+    handleSend(trimmedInitialQuery);
+  }, [
+    handleSend,
+    initialChatId,
+    initialQuery,
+    organizationId,
+    setInitialQuery,
+  ]);
+
   const handleRemoveQueued = useCallback((id: string) => {
     setQueuedMessages((prev) => prev.filter((m) => m.id !== id));
   }, []);
@@ -1343,6 +1378,7 @@ function StandaloneChatPageClient({
             <ChatInputAdvanced
               context={context}
               error={chatError}
+              initialValue={initialQuery ?? undefined}
               isLoading={isLoading}
               isStopping={isStopping}
               model={selectedModel}
@@ -1562,6 +1598,7 @@ function StandaloneChatPageClient({
                 connectedTop={queuedMessages.length > 0}
                 context={context}
                 error={chatError}
+                initialValue={initialQuery ?? undefined}
                 isLoading={isLoading}
                 isStopping={isStopping}
                 model={selectedModel}
