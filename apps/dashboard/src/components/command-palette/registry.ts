@@ -19,7 +19,10 @@ import type {
   CommandSection,
 } from "@/types/components/command-palette";
 
-export type { CommandRoute, CommandSection };
+export type {
+  CommandRoute,
+  CommandSection,
+} from "@/types/components/command-palette";
 
 export const COMMAND_ROUTES: CommandRoute[] = [
   {
