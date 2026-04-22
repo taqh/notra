@@ -59,7 +59,8 @@ app.use("/v1/*", async (c, next) => {
   const origin = c.req.header("origin");
   const allowedOrigin = getAllowedOrigin(origin);
 
-  c.header("Vary", "Origin");
+  c.header("Vary", "Origin, Authorization");
+  c.header("Cache-Control", "private, no-store");
   c.header("X-Content-Type-Options", "nosniff");
   c.header(
     "Strict-Transport-Security",
