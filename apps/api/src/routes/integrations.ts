@@ -24,6 +24,7 @@ import {
   isGitHubIntegrationUnavailableError,
   validateGitHubRepositoryAccess,
 } from "../utils/github-integrations";
+import { logError } from "../utils/logging";
 import { errorResponse } from "../utils/openapi-responses";
 import { getOrganizationResponse } from "../utils/organizations";
 import { isConstraintViolation, isPgUniqueViolation } from "../utils/pg-errors";
@@ -305,7 +306,7 @@ integrationsRoutes.openapi(createGitHubIntegrationRoute, async (c) => {
       return c.json({ error: safeMessage }, 400);
     }
 
-    console.error("Failed to create GitHub integration", error);
+    logError("Failed to create GitHub integration", error);
 
     return c.json(
       {
