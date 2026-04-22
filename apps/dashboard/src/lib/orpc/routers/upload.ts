@@ -111,7 +111,7 @@ export const uploadRouter = {
 
       let sanitized: string;
       try {
-        sanitized = sanitizeSvg(input.svg);
+        sanitized = await sanitizeSvg(input.svg);
       } catch (error) {
         if (error instanceof SvgSanitizationError) {
           throw badRequest(error.message);
