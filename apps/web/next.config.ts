@@ -1,6 +1,7 @@
 import path from "node:path";
 import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
+import { HOMEPAGE_LINK_HEADER } from "./src/utils/urls";
 
 const SHOWCASE_COMPANY_SLUGS = [
   "autumn",
@@ -312,6 +313,15 @@ const nextConfig: NextConfig = {
     },
   ],
   headers: async () => [
+    {
+      source: "/",
+      headers: [
+        {
+          key: "Link",
+          value: HOMEPAGE_LINK_HEADER,
+        },
+      ],
+    },
     {
       source: "/(.*)",
       headers: [
