@@ -18,6 +18,7 @@ import {
   LOOKBACK_WINDOWS,
   SUPPORTED_CONTENT_GENERATION_TYPES,
 } from "@notra/content-generation/schemas";
+import { assertPublicHttpUrl } from "../utils/url";
 import { resourceIdSchema } from "./ids";
 
 const HTTP_PROTOCOL_REGEX = /^https?:\/\//i;
@@ -271,7 +272,17 @@ const websiteUrlSchema = z
   .transform((value) =>
     HTTP_PROTOCOL_REGEX.test(value) ? value : `https://${value}`
   )
-  .pipe(z.string().url("Invalid website URL"));
+  .pipe(z.string().url("Invalid website URL"))
+  .superRefine((value, ctx) => {
+    try {
+      assertPublicHttpUrl(value);
+    } catch (error) {
+      ctx.addIssue({
+        code: "custom",
+        message: error instanceof Error ? error.message : "Invalid website URL",
+      });
+    }
+  });
 
 const brandIdentityResponseSchema = z.object({
   id: z.string(),
