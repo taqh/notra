@@ -25,9 +25,10 @@ import {
   validateGitHubRepositoryAccess,
 } from "../utils/github-integrations";
 import { logError } from "../utils/logging";
-import { errorResponse } from "../utils/openapi-responses";
+import { errorResponse, rateLimitResponse } from "../utils/openapi-responses";
 import { getOrganizationResponse } from "../utils/organizations";
 import { isConstraintViolation, isPgUniqueViolation } from "../utils/pg-errors";
+import { enforceRatelimit, RATE_LIMITS, ratelimit } from "../utils/ratelimit";
 import {
   deleteQstashSchedulesForTriggers,
   disableTriggersAndDeleteIntegration,
@@ -90,6 +91,10 @@ const createGitHubIntegrationRoute = createRoute({
     403: errorResponse("Forbidden"),
     404: errorResponse("Organization not found"),
     409: errorResponse("Repository already connected"),
+    429: rateLimitResponse(
+      RATE_LIMITS.integrationCreate.requests,
+      RATE_LIMITS.integrationCreate.window
+    ),
     503: errorResponse("Authentication or integration service unavailable"),
   },
 });
@@ -186,6 +191,11 @@ integrationsRoutes.openapi(createGitHubIntegrationRoute, async (c) => {
       { error: "Forbidden: API key must be scoped to an organization" },
       403
     );
+  }
+
+  const rateLimited = await enforceRatelimit(c, ratelimit.integrationCreate);
+  if (rateLimited) {
+    return rateLimited;
   }
 
   const body = c.req.valid("json");
