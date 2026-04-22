@@ -14,6 +14,7 @@ import {
   BreadcrumbSeparator,
 } from "@notra/ui/components/ui/breadcrumb";
 import { Button } from "@notra/ui/components/ui/button";
+import { Kbd } from "@notra/ui/components/ui/kbd";
 import { Separator } from "@notra/ui/components/ui/separator";
 import { SidebarTrigger } from "@notra/ui/components/ui/sidebar";
 import { useHotkey } from "@tanstack/react-hotkeys";
@@ -177,9 +178,7 @@ export function SiteHeader() {
               <Button className="gap-1.5" size="sm" variant="outline">
                 <HugeiconsIcon icon={Message01Icon} size={16} />
                 Feedback
-                <kbd className="pointer-events-none ml-1 hidden select-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-muted-foreground text-xs sm:inline-block">
-                  F
-                </kbd>
+                <Kbd className="ml-1 hidden sm:inline-flex">F</Kbd>
               </Button>
             }
           />
@@ -193,9 +192,7 @@ export function SiteHeader() {
           >
             <HugeiconsIcon icon={Calendar03Icon} size={16} />
             Book a Call
-            <kbd className="pointer-events-none ml-1 hidden select-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-muted-foreground text-xs sm:inline-block">
-              C
-            </kbd>
+            <Kbd className="ml-1 hidden sm:inline-flex">C</Kbd>
           </Button>
         </div>
       </div>

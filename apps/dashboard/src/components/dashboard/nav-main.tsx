@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@notra/ui/components/ui/badge";
+import { Kbd, KbdGroup } from "@notra/ui/components/ui/kbd";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -21,6 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@notra/ui/components/ui/sidebar";
+import { useIsApplePlatform } from "@notra/ui/hooks/use-is-apple-platform";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { memo } from "react";
@@ -139,7 +141,7 @@ const NavGroup = memo(function NavGroup({
                       <span>{item.label}</span>
                       {item.badge && (
                         <Badge
-                          className="ml-auto h-[1.125rem] px-[0.375rem] text-[0.625rem]"
+                          className="ml-auto h-[1.125rem] px-[0.375rem] text-[0.625rem] text-muted-foreground"
                           variant="secondary"
                         >
                           {item.badge}
@@ -168,6 +170,7 @@ export function NavMain() {
   const pathname = usePathname();
   const aiChatExperiment = useAiChatExperiment();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
+  const isApplePlatform = useIsApplePlatform();
 
   if (!activeOrganization?.slug) {
     return null;
@@ -191,9 +194,10 @@ export function NavMain() {
               >
                 <HugeiconsIcon icon={SearchIcon} />
                 <span>Search</span>
-                <kbd className="pointer-events-none ml-auto select-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground group-data-[collapsible=icon]:hidden">
-                  ⌘K
-                </kbd>
+                <KbdGroup className="ml-auto group-data-[collapsible=icon]:hidden">
+                  <Kbd>{isApplePlatform ? "⌘" : "Ctrl"}</Kbd>
+                  <Kbd>K</Kbd>
+                </KbdGroup>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@notra/ui/components/ui/dialog";
+import { Kbd } from "@notra/ui/components/ui/kbd";
 import { cn } from "@notra/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Command as CommandPrimitive } from "cmdk";
@@ -84,25 +85,6 @@ function BrailleSpinner({ className }: { className?: string }) {
     >
       {BRAILLE_FRAMES[frame]}
     </span>
-  );
-}
-
-function Kbd({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <kbd
-      className={cn(
-        "pointer-events-none inline-flex h-5 min-w-5 select-none items-center justify-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground",
-        className
-      )}
-    >
-      {children}
-    </kbd>
   );
 }
 
