@@ -28,21 +28,31 @@ export const chatMessageMetadataSchema = z.object({
   createdAt: z.number().int().nonnegative().optional(),
 });
 
-const uiMessageSchema = z.custom<UIMessage>((value) => {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-  const candidate = value as { id?: unknown; role?: unknown; parts?: unknown };
-  return (
-    typeof candidate.id === "string" &&
-    typeof candidate.role === "string" &&
-    Array.isArray(candidate.parts)
-  );
-}, "Invalid chat message");
+export const UI_MESSAGE_ID_MAX_LENGTH = 200;
+export const UI_MESSAGE_PART_TEXT_MAX_LENGTH = 100_000;
+export const UI_MESSAGE_PART_TYPE_MAX_LENGTH = 100;
+export const UI_MESSAGE_PARTS_MAX = 50;
+export const UI_MESSAGES_MAX = 200;
+
+const uiMessagePartSchema = z
+  .looseObject({
+    type: z.string().min(1).max(UI_MESSAGE_PART_TYPE_MAX_LENGTH),
+    text: z.string().max(UI_MESSAGE_PART_TEXT_MAX_LENGTH).optional(),
+  })
+  .refine((part) => part.type !== "text" || typeof part.text === "string", {
+    message: "Text parts must include a text string",
+  });
+
+export const uiMessageSchema = z.object({
+  id: z.string().min(1).max(UI_MESSAGE_ID_MAX_LENGTH),
+  role: z.enum(["user", "assistant", "system"]),
+  parts: z.array(uiMessagePartSchema).min(1).max(UI_MESSAGE_PARTS_MAX),
+  metadata: z.looseObject({}).optional(),
+}) as unknown as z.ZodType<UIMessage>;
 
 export const standaloneChatRequestSchema = z.object({
   chatId: z.string().min(1).optional(),
-  messages: z.array(uiMessageSchema).min(1),
+  messages: z.array(uiMessageSchema).min(1).max(UI_MESSAGES_MAX),
   context: z.array(standaloneChatContextSchema).optional(),
   model: chatModelSchema.optional(),
   enableThinking: z.boolean().optional(),
