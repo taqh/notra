@@ -1,4 +1,8 @@
 import { contentTypeSchema } from "@notra/ai/schemas/content";
+import {
+  POST_MARKDOWN_MAX_LENGTH,
+  POST_TITLE_MAX_LENGTH,
+} from "@notra/ai/schemas/limits";
 import { POST_SLUG_MAX_LENGTH } from "@notra/ai/schemas/post";
 // biome-ignore lint/performance/noNamespaceImport: Zod recommended way to import
 import * as z from "zod";
@@ -117,9 +121,9 @@ const slugFieldSchema = z.string().slugify().min(1).max(POST_SLUG_MAX_LENGTH);
 
 export const updateContentSchema = z
   .object({
-    title: z.string().trim().min(1).max(120).optional(),
+    title: z.string().trim().min(1).max(POST_TITLE_MAX_LENGTH).optional(),
     slug: slugFieldSchema.nullable().optional(),
-    markdown: z.string().min(1).optional(),
+    markdown: z.string().min(1).max(POST_MARKDOWN_MAX_LENGTH).optional(),
     status: postStatusSchema.optional(),
   })
   .refine(

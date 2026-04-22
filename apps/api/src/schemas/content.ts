@@ -1,5 +1,17 @@
 import { z } from "@hono/zod-openapi";
 import { supportedLanguageSchema } from "@notra/ai/schemas/language";
+import {
+  BRAND_AUDIENCE_MAX_LENGTH,
+  BRAND_AUDIENCE_MIN_LENGTH,
+  BRAND_COMPANY_DESCRIPTION_MAX_LENGTH,
+  BRAND_COMPANY_DESCRIPTION_MIN_LENGTH,
+  BRAND_COMPANY_NAME_MAX_LENGTH,
+  BRAND_CUSTOM_INSTRUCTIONS_MAX_LENGTH,
+  BRAND_CUSTOM_TONE_MAX_LENGTH,
+  BRAND_NAME_MAX_LENGTH,
+  POST_MARKDOWN_MAX_LENGTH,
+  POST_TITLE_MAX_LENGTH,
+} from "@notra/ai/schemas/limits";
 import { POST_SLUG_MAX_LENGTH, POST_SLUG_REGEX } from "@notra/ai/schemas/post";
 import { toneProfileSchema } from "@notra/ai/schemas/tone";
 import {
@@ -378,9 +390,15 @@ export const getPostResponseSchema = z.object({
 
 export const patchPostRequestSchema = z
   .object({
-    title: z.string().trim().min(1).max(120).optional().openapi({
-      example: "Ship notes for week 11",
-    }),
+    title: z
+      .string()
+      .trim()
+      .min(1)
+      .max(POST_TITLE_MAX_LENGTH)
+      .optional()
+      .openapi({
+        example: "Ship notes for week 11",
+      }),
     slug: z
       .string()
       .trim()
@@ -395,9 +413,14 @@ export const patchPostRequestSchema = z
       .openapi({
         example: "ship-notes-week-11",
       }),
-    markdown: z.string().min(1).optional().openapi({
-      example: "# Ship notes\n\nWe shipped a faster editor.",
-    }),
+    markdown: z
+      .string()
+      .min(1)
+      .max(POST_MARKDOWN_MAX_LENGTH)
+      .optional()
+      .openapi({
+        example: "# Ship notes\n\nWe shipped a faster editor.",
+      }),
     status: postStatusSchema.optional().openapi({
       example: "published",
     }),
@@ -419,7 +442,7 @@ export const patchPostResponseSchema = z.object({
 });
 
 export const createBrandIdentityRequestSchema = z.object({
-  name: z.string().trim().min(1).max(120).optional().openapi({
+  name: z.string().trim().min(1).max(BRAND_NAME_MAX_LENGTH).optional().openapi({
     example: "Notra",
   }),
   websiteUrl: websiteUrlSchema.openapi({
@@ -468,19 +491,33 @@ export const getBrandAnalysisJobResponseSchema = z.object({
 
 export const patchBrandIdentityRequestSchema = z
   .object({
-    name: z.string().trim().min(1).max(120).optional().openapi({
-      example: "Notra",
-    }),
+    name: z
+      .string()
+      .trim()
+      .min(1)
+      .max(BRAND_NAME_MAX_LENGTH)
+      .optional()
+      .openapi({
+        example: "Notra",
+      }),
     websiteUrl: websiteUrlSchema.optional().openapi({
       example: "https://usenotra.com",
     }),
-    companyName: z.string().trim().min(1).optional().nullable().openapi({
-      example: "Notra",
-    }),
+    companyName: z
+      .string()
+      .trim()
+      .min(1)
+      .max(BRAND_COMPANY_NAME_MAX_LENGTH)
+      .optional()
+      .nullable()
+      .openapi({
+        example: "Notra",
+      }),
     companyDescription: z
       .string()
       .trim()
-      .min(10)
+      .min(BRAND_COMPANY_DESCRIPTION_MIN_LENGTH)
+      .max(BRAND_COMPANY_DESCRIPTION_MAX_LENGTH)
       .optional()
       .nullable()
       .openapi({
@@ -491,17 +528,36 @@ export const patchBrandIdentityRequestSchema = z
       description:
         "Set a preset tone profile. When provided without customTone, any saved custom tone is cleared.",
     }),
-    customTone: z.string().trim().optional().nullable().openapi({
-      example: "Clear, direct, and technically confident",
-      description:
-        "Provide a custom tone override. Send an empty string or null to clear it.",
-    }),
-    customInstructions: z.string().trim().optional().nullable().openapi({
-      example: "Avoid hype. Prioritize concrete examples.",
-    }),
-    audience: z.string().trim().min(10).optional().nullable().openapi({
-      example: "Engineering leaders and developer tooling teams.",
-    }),
+    customTone: z
+      .string()
+      .trim()
+      .max(BRAND_CUSTOM_TONE_MAX_LENGTH)
+      .optional()
+      .nullable()
+      .openapi({
+        example: "Clear, direct, and technically confident",
+        description:
+          "Provide a custom tone override. Send an empty string or null to clear it.",
+      }),
+    customInstructions: z
+      .string()
+      .trim()
+      .max(BRAND_CUSTOM_INSTRUCTIONS_MAX_LENGTH)
+      .optional()
+      .nullable()
+      .openapi({
+        example: "Avoid hype. Prioritize concrete examples.",
+      }),
+    audience: z
+      .string()
+      .trim()
+      .min(BRAND_AUDIENCE_MIN_LENGTH)
+      .max(BRAND_AUDIENCE_MAX_LENGTH)
+      .optional()
+      .nullable()
+      .openapi({
+        example: "Engineering leaders and developer tooling teams.",
+      }),
     language: supportedLanguageSchema.optional().nullable().openapi({
       example: "English",
     }),
