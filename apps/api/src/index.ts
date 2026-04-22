@@ -17,19 +17,21 @@ const FRAMER_PLUGIN_ORIGIN_PATTERN = new RegExp(
 
 const LOCAL_DEV_ORIGIN_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
 function getAllowedOrigin(origin: string | undefined): string | null {
   if (!origin) {
     return null;
   }
 
-  if (
-    FRAMER_PLUGIN_ORIGIN_PATTERN.test(origin) ||
-    LOCAL_DEV_ORIGIN_PATTERN.test(origin)
-  ) {
-    return origin;
-  }
+  const allowedPatterns = [
+    FRAMER_PLUGIN_ORIGIN_PATTERN,
+    ...(IS_PRODUCTION ? [] : [LOCAL_DEV_ORIGIN_PATTERN]),
+  ];
 
-  return null;
+  return allowedPatterns.some((pattern) => pattern.test(origin))
+    ? origin
+    : null;
 }
 
 interface Bindings {
