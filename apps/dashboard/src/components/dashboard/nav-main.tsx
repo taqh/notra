@@ -59,15 +59,15 @@ const navMainItems: NavMainItem[] = [
     category: "workspace",
   },
   {
-    link: "/skills",
-    icon: MagicWand01Icon,
-    label: "Skills",
-    category: "workspace",
-  },
-  {
     link: "/brand/identity",
     icon: CorporateIcon,
     label: "Identity & References",
+    category: "workspace",
+  },
+  {
+    link: "/skills",
+    icon: MagicWand01Icon,
+    label: "Skills",
     category: "workspace",
   },
   {
