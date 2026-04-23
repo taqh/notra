@@ -36,11 +36,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Notra - Turn your daily work into publish-ready content",
+    default: "Notra. Ship more. Write less. Reach more.",
     template: "%s - Notra",
   },
   description:
-    "Notra connects to GitHub, Linear and Slack to turn shipped work into ready-to-publish changelogs, blog posts, and social updates.",
+    "Notra turns shipped work into changelogs, launch posts, and social updates in your voice.",
   alternates: {
     canonical: SITE_URL,
   },
@@ -49,16 +49,16 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: SITE_URL,
     siteName: "Notra",
-    title: "Notra - Turn your daily work into publish-ready content",
+    title: "Notra. Ship more. Write less. Reach more.",
     description:
-      "Notra connects to GitHub, Linear and Slack to turn shipped work into ready-to-publish changelogs, blog posts, and social updates.",
+      "Notra turns shipped work into changelogs, launch posts, and social updates in your voice.",
     images: [DEFAULT_SOCIAL_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Notra - Turn your daily work into publish-ready content",
+    title: "Notra. Ship more. Write less. Reach more.",
     description:
-      "Notra connects to GitHub, Linear and Slack to turn shipped work into ready-to-publish changelogs, blog posts, and social updates.",
+      "Notra turns shipped work into changelogs, launch posts, and social updates in your voice.",
     images: [DEFAULT_SOCIAL_IMAGE.url],
     site: TWITTER_HANDLE,
     creator: TWITTER_HANDLE,
