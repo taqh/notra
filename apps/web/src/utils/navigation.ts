@@ -32,6 +32,21 @@ export const FOOTER_EXTENSION_LINKS = [
   },
 ] as const;
 
+export const FOOTER_INTEGRATION_LINKS = [
+  {
+    href: "https://github.com",
+    label: "GitHub",
+    rel: "noreferrer",
+    target: "_blank",
+  },
+  {
+    href: "https://linear.app",
+    label: "Linear",
+    rel: "noreferrer",
+    target: "_blank",
+  },
+] as const;
+
 export const FOOTER_PRODUCT_LINKS = [
   {
     href: "/#features",
