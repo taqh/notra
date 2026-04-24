@@ -63,7 +63,6 @@ export interface ContributorsStats {
 export interface ContributorsData {
   repo: GitHubRepo | null;
   contributors: GitHubUser[];
-  clankers: GitHubUser[];
   issues: GitHubIssue[];
   prs: GitHubPR[];
   stats: ContributorsStats;

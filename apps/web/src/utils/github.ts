@@ -19,7 +19,6 @@ const REVALIDATE_SECONDS = 3600;
 const EMPTY_DATA: ContributorsData = {
   repo: null,
   contributors: [],
-  clankers: [],
   issues: [],
   prs: [],
   stats: {
@@ -82,15 +81,9 @@ export async function fetchContributorsData(): Promise<ContributorsData> {
     return EMPTY_DATA;
   }
 
-  const allContributors = contributorsRaw ?? [];
-
-  const isClanker = (c: GitHubUser) =>
-    c.type === "Bot" || c.login.endsWith("[bot]");
-
-  const contributors = allContributors.filter(
-    (c) => c.type === "User" && !c.login.endsWith("[bot]")
-  );
-  const clankers = allContributors.filter(isClanker);
+  const contributors = (contributorsRaw ?? [])
+    .filter((c) => c.type === "User")
+    .filter((c) => !c.login.endsWith("[bot]"));
 
   const issues = (issuesRaw ?? [])
     .filter((issue) => !issue.pull_request)
@@ -102,7 +95,6 @@ export async function fetchContributorsData(): Promise<ContributorsData> {
   return {
     repo,
     contributors: contributors.slice(0, 24),
-    clankers: clankers.slice(0, 12),
     issues,
     prs,
     stats: {

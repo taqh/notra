@@ -4,15 +4,13 @@ import type { GitHubUser } from "~types/github";
 
 export function ContributorsGrid({
   contributors,
-  emptyMessage = "Unable to load contributors right now. Try again later.",
 }: {
   contributors: GitHubUser[];
-  emptyMessage?: string;
 }) {
   if (contributors.length === 0) {
     return (
       <div className="py-8 text-center text-muted-foreground text-sm">
-        {emptyMessage}
+        Unable to load contributors right now. Try again later.
       </div>
     );
   }
@@ -20,13 +18,13 @@ export function ContributorsGrid({
     <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
       {contributors.map((contributor) => (
         <Link
-          aria-label={`${contributor.login} — ${contributor.contributions} commits`}
+          aria-label={`${contributor.login} — ${contributor.contributions} contributions`}
           className="group flex flex-col items-center gap-2 rounded-lg p-2 transition-colors hover:bg-muted"
           href={contributor.html_url}
           key={contributor.id}
           rel="noopener noreferrer"
           target="_blank"
-          title={`${contributor.login} — ${contributor.contributions} commits`}
+          title={`${contributor.login} — ${contributor.contributions} contributions`}
         >
           <Image
             alt={`Avatar of ${contributor.login}`}
@@ -38,9 +36,6 @@ export function ContributorsGrid({
           />
           <span className="w-full truncate text-center font-sans text-muted-foreground text-xs transition-colors group-hover:text-foreground">
             {contributor.login}
-          </span>
-          <span className="font-medium font-sans text-[0.6875rem] text-muted-foreground/80 tabular-nums">
-            {contributor.contributions.toLocaleString()} commits
           </span>
         </Link>
       ))}
