@@ -1,5 +1,6 @@
 import { contentTypeSchema } from "@notra/ai/schemas/content";
 import { createGetAvailableBrandReferencesTool } from "@notra/ai/tools/brand-references";
+import { exampleTool } from "@notra/ai/tools/example";
 import {
   createGetCommitsByTimeframeTool,
   createGetPullRequestsTool,
@@ -99,6 +100,13 @@ export function buildStandaloneToolSet(
   descriptions.push(
     "**Skills**: Access knowledge and writing guidelines using listAvailableSkills and getSkillByName"
   );
+
+  if (process.env.NODE_ENV === "development") {
+    tools.example = exampleTool();
+    descriptions.push(
+      "**Example (testing)**: A dummy tool triggered when the user says 'example' — echoes a message for UI testing"
+    );
+  }
 
   const hasGitHub = validatedIntegrations.some(
     (i) => i.type === "github" && i.repositories.length > 0

@@ -1,11 +1,6 @@
 import { ANTHROPIC_PROMPT_CACHING_OPTIONS } from "@notra/ai/constants/prompt-caching";
 import type { ModelMessage } from "ai";
 
-// Put the cache breakpoint on the latest user message. The actual "last
-// message" flips between user/assistant/tool across multi-step generations,
-// so caching there invalidates the prefix every step. The last user turn is
-// a stable anchor — everything before it (system, tools, prior turns) gets
-// reused from cache on subsequent steps within the same request.
 export function addAnthropicPromptCaching(
   messages: ModelMessage[],
   modelId: string
@@ -14,35 +9,44 @@ export function addAnthropicPromptCaching(
     return messages;
   }
 
-  let lastUserIndex = -1;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i]?.role === "user") {
-      lastUserIndex = i;
-      break;
-    }
-  }
-  if (lastUserIndex === -1) {
-    return messages;
-  }
+  const lastIndex = messages.length - 1;
+  const stableBoundaryIndex = findStableBoundaryIndex(messages, lastIndex);
 
   return messages.map((message, index) => {
-    if (index !== lastUserIndex) {
+    if (index !== lastIndex && index !== stableBoundaryIndex) {
       return message;
     }
 
-    return {
-      ...message,
-      providerOptions: {
-        ...message.providerOptions,
-        anthropic: {
-          ...message.providerOptions?.anthropic,
-          ...ANTHROPIC_PROMPT_CACHING_OPTIONS.anthropic,
-        },
-      },
-    };
+    return withCacheControl(message);
   });
 }
 
-function isAnthropicModel(modelId: string): boolean {
-  return modelId.startsWith("anthropic/") || modelId.includes("claude");
+export function withCacheControl(message: ModelMessage): ModelMessage {
+  return {
+    ...message,
+    providerOptions: {
+      ...message.providerOptions,
+      anthropic: {
+        ...message.providerOptions?.anthropic,
+        ...ANTHROPIC_PROMPT_CACHING_OPTIONS.anthropic,
+      },
+    },
+  };
+}
+
+export function isAnthropicModel(modelId: string): boolean {
+  return modelId.startsWith("anthropic/");
+}
+
+function findStableBoundaryIndex(
+  messages: ModelMessage[],
+  lastIndex: number
+): number {
+  for (let index = lastIndex - 1; index >= 0; index -= 1) {
+    const role = messages[index]?.role;
+    if (role === "assistant" || role === "tool") {
+      return index;
+    }
+  }
+  return -1;
 }

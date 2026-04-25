@@ -19,6 +19,7 @@ import type {
 } from "@notra/ai/types/standalone-chat";
 import {
   convertToModelMessages,
+  isToolUIPart,
   smoothStream,
   stepCountIs,
   streamText,
@@ -61,11 +62,13 @@ export async function orchestrateStandaloneChat(
 
   const log = deps?.log ?? inputLog;
 
-  const validatedIntegrations = await validateStandaloneIntegrations(
-    organizationId,
-    context,
-    deps?.integrationFetchers
-  );
+  const validatedIntegrations =
+    deps?.preValidatedIntegrations ??
+    (await validateStandaloneIntegrations(
+      organizationId,
+      context,
+      deps?.integrationFetchers
+    ));
 
   const hasGitHub = hasEnabledGitHubIntegration(validatedIntegrations);
   const hasLinear = hasEnabledLinearIntegration(validatedIntegrations);
@@ -172,9 +175,9 @@ export async function orchestrateStandaloneChat(
         effectiveThinkingLevel
       );
 
-  const messagesForModel = isSimpleNoTools
-    ? trimTrivialHistory(messages)
-    : messages;
+  const messagesForModel = stripIncompleteToolParts(
+    isSimpleNoTools ? trimTrivialHistory(messages) : messages
+  );
 
   const modelMessages = await convertToModelMessages(messagesForModel, {
     ignoreIncompleteToolCalls: true,
@@ -255,6 +258,48 @@ function getLastUserMessage(messages: UIMessage[]): string {
     }
   }
   return "";
+}
+
+const TERMINAL_TOOL_STATES = new Set([
+  "output-available",
+  "output-error",
+  "output-denied",
+]);
+
+const STRIP_TAIL_SCAN_DEPTH = 2;
+
+function stripIncompleteToolParts(messages: UIMessage[]): UIMessage[] {
+  const scanFrom = Math.max(0, messages.length - STRIP_TAIL_SCAN_DEPTH);
+  let hasIncomplete = false;
+  for (let index = scanFrom; index < messages.length; index += 1) {
+    const message = messages[index];
+    if (!(message && Array.isArray(message.parts))) {
+      continue;
+    }
+    if (
+      message.parts.some(
+        (part) => isToolUIPart(part) && !TERMINAL_TOOL_STATES.has(part.state)
+      )
+    ) {
+      hasIncomplete = true;
+      break;
+    }
+  }
+  if (!hasIncomplete) {
+    return messages;
+  }
+  return messages.map((message, index) => {
+    if (index < scanFrom || !Array.isArray(message.parts)) {
+      return message;
+    }
+    const filtered = message.parts.filter(
+      (part) => !isToolUIPart(part) || TERMINAL_TOOL_STATES.has(part.state)
+    );
+    if (filtered.length === message.parts.length) {
+      return message;
+    }
+    return { ...message, parts: filtered };
+  });
 }
 
 function trimTrivialHistory(messages: UIMessage[]): UIMessage[] {
