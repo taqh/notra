@@ -13,6 +13,10 @@ export const SOCIAL_LINKS = {
 
 export const NOTRA_LOGO_PATH = "/notra-mark.svg";
 
+export const OG_EXCLUDED_CONTRIBUTOR = "mezotv";
+export const OG_MAX_CONTRIBUTORS = 6;
+export const OG_MAX_LOGIN_LENGTH = 12;
+
 export const BLOG_HEADING_REGEX = /<h([2-3])[^>]*>([\s\S]*?)<\/h\1>/gi;
 export const BLOG_PARAGRAPH_REGEX = /<p[^>]*>([\s\S]*?)<\/p>/gi;
 export const BLOG_TAG_REGEX = /<[^>]+>/g;
