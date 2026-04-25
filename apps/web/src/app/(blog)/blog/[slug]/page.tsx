@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChangelogHtmlArticle } from "@/components/changelog-html-article";
-import { NotraMark } from "@/components/notra-mark";
 import { formatBlogDate, getNotraBlogPostBySlug } from "@/utils/blog";
 import {
   buildBlogArticleJsonLd,
@@ -91,15 +90,6 @@ export default async function BlogEntryPage({ params }: BlogEntryPageProps) {
       <time className="mt-2 block font-sans text-foreground/40 text-sm">
         {formatBlogDate(post.createdAt)}
       </time>
-
-      <div className="mt-4 flex items-center gap-1.5">
-        <span className="text-primary">
-          <NotraMark className="size-3.5 shrink-0" />
-        </span>
-        <p className="font-sans text-muted-foreground text-xs">
-          Published by the Notra team.
-        </p>
-      </div>
 
       <ChangelogHtmlArticle html={post.content} />
     </>
