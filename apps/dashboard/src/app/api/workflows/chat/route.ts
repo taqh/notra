@@ -4,7 +4,6 @@ import { serve } from "@upstash/workflow/nextjs";
 import type { UIMessageChunk } from "ai";
 import { nanoid } from "nanoid";
 import { FEATURES } from "@/constants/features";
-import { isAiChatExperimentEnabled } from "@/lib/ai-chat-experiment";
 import { autumn } from "@/lib/billing/autumn";
 import { calculateTokenCostCents } from "@/lib/billing/token-pricing";
 import {
@@ -48,8 +47,6 @@ export const { POST } = serve<ChatWorkflowPayload>(async (context) => {
     requestId,
     organizationId,
     chatId,
-    userId,
-    userEmail,
     context: standaloneContext,
     useMarkup,
     model,
@@ -57,17 +54,6 @@ export const { POST } = serve<ChatWorkflowPayload>(async (context) => {
     thinkingLevel,
     timezone,
   } = parseResult.data;
-
-  const aiChatEnabled = await isAiChatExperimentEnabled({
-    userId,
-    email: userEmail,
-    organizationId,
-  });
-
-  if (!aiChatEnabled) {
-    await context.cancel();
-    return;
-  }
 
   const messages = await context.run("load-chat-history", () =>
     loadChatHistory(organizationId, chatId)

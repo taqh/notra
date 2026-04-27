@@ -54,7 +54,6 @@ import {
   UserMessageActions,
   UserMessageEditor,
 } from "@/components/chat/user-message-actions";
-import { useAiChatExperiment } from "@/components/providers/databuddy-flags-provider";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import { authClient } from "@/lib/auth/client";
 import { isImageMimeType } from "@/lib/upload/mime";
@@ -1915,24 +1914,6 @@ function StandaloneChatPageClient({
 }
 
 export default function PageClient(props: PageClientProps) {
-  const aiChatExperiment = useAiChatExperiment();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!aiChatExperiment.loading && !aiChatExperiment.on) {
-      router.replace(`/${props.organizationSlug}`);
-    }
-  }, [
-    aiChatExperiment.loading,
-    aiChatExperiment.on,
-    props.organizationSlug,
-    router,
-  ]);
-
-  if (!aiChatExperiment.on) {
-    return null;
-  }
-
   return (
     <StandaloneChatPageClient
       chatId={props.chatId}

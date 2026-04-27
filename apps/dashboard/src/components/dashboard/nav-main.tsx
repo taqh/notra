@@ -28,7 +28,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { memo } from "react";
 import { useCommandPalette } from "@/components/command-palette/command-palette-context";
-import { useAiChatExperiment } from "@/components/providers/databuddy-flags-provider";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import type { NavMainCategory, NavMainItem } from "@/types/components/nav";
 
@@ -175,7 +174,6 @@ const categories = Object.keys(categoryLabels) as Exclude<
 export function NavMain() {
   const { activeOrganization } = useOrganizationsContext();
   const pathname = usePathname();
-  const aiChatExperiment = useAiChatExperiment();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const isApplePlatform = useIsApplePlatform();
 
@@ -184,9 +182,7 @@ export function NavMain() {
   }
 
   const slug = activeOrganization.slug;
-  const rootItems = itemsByCategory.none.filter(
-    (item) => item.link !== "/chat" || aiChatExperiment.on
-  );
+  const rootItems = itemsByCategory.none;
 
   return (
     <>

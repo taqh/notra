@@ -47,7 +47,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useAiChatExperiment } from "@/components/providers/databuddy-flags-provider";
 import { useOrganizationsContext } from "@/components/providers/organization-provider";
 import { CHAT_TITLE_MAX_LENGTH } from "@/constants/chat";
 import {
@@ -63,7 +62,6 @@ export function ChatHistoryNav() {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const aiChatExperiment = useAiChatExperiment();
   const { state: sidebarState, isMobile } = useSidebar();
   const isCollapsed = sidebarState === "collapsed" && !isMobile;
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -105,9 +103,7 @@ export function ChatHistoryNav() {
     });
   }
 
-  const { sessions, isLoading } = useChatSessions({
-    enabled: aiChatExperiment.on,
-  });
+  const { sessions, isLoading } = useChatSessions();
   const shouldReduceMotion = useReducedMotion();
   const { renameChat, togglePinned, deleteChat } = useChatSessionMutations();
 
@@ -334,7 +330,7 @@ export function ChatHistoryNav() {
     );
   }
 
-  if (!slug || !aiChatExperiment.on) {
+  if (!slug) {
     return null;
   }
 

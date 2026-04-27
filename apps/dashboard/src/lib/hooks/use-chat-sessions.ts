@@ -16,11 +16,7 @@ import {
   sortChatSessions,
 } from "@/utils/chat";
 
-export function useChatSessions({
-  enabled = true,
-}: {
-  enabled?: boolean;
-} = {}) {
+export function useChatSessions() {
   const { activeOrganization } = useOrganizationsContext();
   const organizationId = activeOrganization?.id;
   const queryKey = chatSessionsQueryKey(organizationId);
@@ -40,7 +36,7 @@ export function useChatSessions({
       );
       return parsed.success ? (parsed.data.sessions ?? []) : [];
     },
-    enabled: Boolean(organizationId) && enabled,
+    enabled: Boolean(organizationId),
     staleTime: 1000 * 60,
   });
 
