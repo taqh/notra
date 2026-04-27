@@ -144,7 +144,7 @@ export const POST = withEvlog(async function POST(
         contentType,
         selection,
         context,
-        maxSteps: 5,
+        maxSteps: 50,
         log,
         timezone,
       },
