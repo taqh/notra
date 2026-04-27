@@ -1581,15 +1581,15 @@ export function ChatInputAdvanced({
                   )}
                 </div>
               )}
-              <div className="relative flex flex-col rounded-t-[13px] bg-background">
-                <div className="flex w-full items-center rounded-t-[12px]">
-                  <div className="relative flex flex-1 cursor-text transition-colors [--lh:1lh]">
+              <div className="relative flex min-w-0 flex-col rounded-t-[13px] bg-background">
+                <div className="flex w-full min-w-0 items-center rounded-t-[12px]">
+                  <div className="relative flex min-w-0 flex-1 cursor-text transition-colors [--lh:1lh]">
                     {/* biome-ignore lint/a11y/useSemanticElements: rich mention editor requires a contentEditable host instead of a native textarea. */}
                     <div
                       aria-disabled={isUsageBlocked || isQueued}
                       aria-label="Send a message"
                       aria-multiline="true"
-                      className="wrap-break-word relative max-h-50 min-h-12 w-full overflow-y-auto whitespace-pre-wrap rounded-t-[12px] px-3 py-2 text-foreground text-sm leading-6 caret-foreground outline-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-[empty=true]:before:pointer-events-none data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-3 data-[empty=true]:before:text-muted-foreground data-[empty=true]:before:content-[attr(data-placeholder)]"
+                      className="wrap-anywhere relative max-h-50 min-h-12 w-full min-w-0 overflow-y-auto whitespace-pre-wrap rounded-t-[12px] px-3 py-2 text-foreground text-sm leading-6 caret-foreground outline-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-[empty=true]:before:pointer-events-none data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-3 data-[empty=true]:before:text-muted-foreground data-[empty=true]:before:content-[attr(data-placeholder)]"
                       contentEditable={!(isUsageBlocked || isQueued)}
                       data-empty={isEmpty ? "true" : "false"}
                       data-placeholder={
