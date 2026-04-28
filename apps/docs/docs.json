@@ -57,26 +57,7 @@
     }
   },
   "contextual": {
-    "options": [
-      "copy",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      {
-        "title": "Open in T3 Chat",
-        "description": "Ask questions about this page",
-        "icon": "https://t3.chat/favicon.ico",
-        "href": {
-          "base": "https://t3.chat/new",
-          "query": [
-            {
-              "key": "q",
-              "value": "Read from https://docs.usenotra.com/$path so I can ask questions about it."
-            }
-          ]
-        }
-      }
-    ]
+    "options": ["copy", "assistant", "mcp", "chatgpt", "claude", "perplexity"]
   },
   "navigation": {
     "tabs": [
