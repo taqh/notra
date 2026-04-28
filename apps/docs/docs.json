@@ -64,14 +64,10 @@
     "tabs": [
       {
         "tab": "Documentation",
-        "pages": [
+        "groups": [
           {
-            "group": "Getting Started",
-            "pages": ["overview"]
-          },
-          {
-            "group": "Developer & Productivity Tools",
-            "pages": ["integrations/mcp"]
+            "group": "Get Started",
+            "pages": ["overview", "quickstart"]
           },
           {
             "group": "Integrations",
@@ -80,24 +76,31 @@
               "integrations/linear",
               "integrations/framer",
               "integrations/featul",
-              "integrations/kontentspace"
+              "integrations/kontentspace",
+              "integrations/mcp"
             ]
           }
-        ],
-        "root": "overview"
+        ]
       },
       {
-        "tab": "API & SDK",
-        "pages": [
-          "api/getting-started",
-          "api/rust-sdk",
-          "api/authentication",
-          "api/caching",
-          "api/common-tasks",
-          "api/pagination",
-          "api/types",
+        "tab": "API Reference",
+        "groups": [
           {
-            "group": "Routes",
+            "group": "Getting Started",
+            "pages": ["api/getting-started", "api/authentication"]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "api/rust-sdk",
+              "api/caching",
+              "api/common-tasks",
+              "api/pagination",
+              "api/types"
+            ]
+          },
+          {
+            "group": "Endpoints",
             "expanded": true,
             "openapi": {
               "source": "https://api.usenotra.com/openapi.json",
@@ -161,8 +164,7 @@
               }
             ]
           }
-        ],
-        "root": "api/getting-started"
+        ]
       }
     ],
     "global": {
