@@ -43,6 +43,9 @@ export const metadata: Metadata = {
     "Notra turns shipped work into changelogs, launch posts, and social updates in your voice.",
   alternates: {
     canonical: SITE_URL,
+    types: {
+      "text/plain": `${SITE_URL}/llms.txt`,
+    },
   },
   openGraph: {
     type: "website",
