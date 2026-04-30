@@ -1,5 +1,3 @@
-import { GitCommitIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatContributionCount } from "@/utils/github";
@@ -44,15 +42,11 @@ export function ContributorsGrid({
             <span className="w-full truncate text-center font-sans text-muted-foreground text-xs transition-colors group-hover:text-foreground">
               {contributor.login}
             </span>
-            <span className="inline-flex min-w-[3.25rem] items-center justify-center gap-1 rounded-full border border-border/70 bg-muted/40 px-2 py-0.5 font-medium font-sans text-[0.625rem] text-muted-foreground leading-none transition-colors group-hover:border-border group-hover:bg-background group-hover:text-foreground">
-              <HugeiconsIcon
-                aria-hidden="true"
-                className="size-3 shrink-0"
-                icon={GitCommitIcon}
-              />
+            <span className="font-sans text-[0.625rem] text-muted-foreground leading-none transition-colors group-hover:text-foreground">
               <span className="tabular-nums">
                 {formatContributionCount(contributor.contributions)}
-              </span>
+              </span>{" "}
+              contribution{contributor.contributions === 1 ? "" : "s"}
             </span>
           </Link>
         );
