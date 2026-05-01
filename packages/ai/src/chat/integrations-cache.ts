@@ -1,14 +1,14 @@
-import { CHAT_INTEGRATIONS_CACHE_TTL_SECONDS } from "@notra/ai/constants/chat";
-import type { ValidatedIntegration } from "@notra/ai/types/orchestration";
+import { CHAT_INTEGRATIONS_CACHE_TTL_SECONDS } from "../constants/chat";
 import {
   getGitHubIntegrationsByOrganization,
   getGitHubToolRepositoryContextByIntegrationId,
-} from "@/lib/services/github-integration";
+} from "../integrations/github";
 import {
   getLinearIntegrationsByOrganization,
   getLinearToolContextByIntegrationId,
-} from "@/lib/services/linear-integration";
-import { redis } from "./redis";
+} from "../integrations/linear";
+import type { ValidatedIntegration } from "../types/orchestration";
+import { redis } from "../utils/redis";
 
 function cacheKey(organizationId: string) {
   return `chat:integrations:${organizationId}`;

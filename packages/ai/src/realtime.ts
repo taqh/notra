@@ -1,6 +1,6 @@
 import { Realtime } from "@upstash/realtime";
 import z from "zod/v4";
-import { redis } from "./redis";
+import { redis } from "./utils/redis";
 
 const schema = {
   ai: { chunk: z.any() as z.ZodType<unknown> },

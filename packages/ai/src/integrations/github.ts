@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { createOctokit } from "@notra/ai/utils/octokit";
 import { db } from "@notra/db/drizzle";
 import {
   githubIntegrations,
@@ -8,18 +7,17 @@ import {
 } from "@notra/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
-import { decryptToken, encryptToken } from "@/lib/crypto/token-encryption";
-import type {
-  ErrorWithStatus,
-  ValidateRepositoryBranchExistsParams,
-} from "@/types/services/github";
+import { decryptToken, encryptToken } from "../crypto/token-encryption";
 import type {
   AddRepositoryParams,
   ConfigureOutputParams,
   CreateGitHubIntegrationParams,
+  ErrorWithStatus,
+  ValidateRepositoryBranchExistsParams,
   WebhookConfig,
-} from "@/types/services/integrations";
-import { getConfiguredAppUrl } from "@/utils/url";
+} from "../types/integrations";
+import { createOctokit } from "../utils/octokit";
+import { getConfiguredAppUrl } from "../utils/url";
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 16);
 

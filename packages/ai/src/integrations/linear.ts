@@ -1,10 +1,10 @@
-import type { LinearToolContext } from "@notra/ai/types/tools";
 import { db } from "@notra/db/drizzle";
 import { linearIntegrations, members } from "@notra/db/schema";
 import { and, eq } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
-import { decryptToken, encryptToken } from "@/lib/crypto/token-encryption";
-import type { CreateLinearIntegrationParams } from "@/types/integrations";
+import { decryptToken, encryptToken } from "../crypto/token-encryption";
+import type { CreateLinearIntegrationParams } from "../types/integrations";
+import type { LinearToolContext } from "../types/tools";
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 16);
 

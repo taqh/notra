@@ -1,5 +1,5 @@
-import type { AgentTokenUsage } from "@notra/ai/types/agents";
 import type { Balance } from "autumn-js";
+import type { AgentTokenUsage } from "../types/agents";
 
 export interface ModelPricing {
   inputPerMillionTokens: number;

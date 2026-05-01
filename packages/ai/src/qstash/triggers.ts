@@ -1,19 +1,40 @@
 import { Client as QStashClient } from "@upstash/qstash";
 import { Client as WorkflowClient } from "@upstash/workflow";
-import type {
-  EventWorkflowPayload,
-  OnDemandContentWorkflowPayload,
-} from "@/schemas/workflows";
-import type {
-  CreateQstashScheduleProps,
-  WorkflowDelay,
-} from "@/types/triggers/qstash";
-import type { TriggerSourceConfig } from "@/types/triggers/triggers";
 import {
   getConfiguredAppUrl,
   getConfiguredWorkflowUrl,
   requireConfiguredAppUrl,
-} from "@/utils/url";
+} from "../utils/url";
+
+export type WorkflowDelay =
+  | number
+  | `${bigint}s`
+  | `${bigint}m`
+  | `${bigint}h`
+  | `${bigint}d`;
+
+export interface CreateQstashScheduleProps {
+  triggerId: string;
+  cron: string;
+  scheduleId?: string;
+}
+
+export interface TriggerCronConfig {
+  frequency: "daily" | "weekly" | "monthly";
+  hour?: number;
+  minute?: number;
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+}
+
+export interface EventWorkflowPayloadInput {
+  triggerId: string;
+  eventType: string;
+  eventAction: string;
+  eventData: Record<string, unknown>;
+  repositoryId: string;
+  deliveryId?: string;
+}
 
 function getQstashToken() {
   const token = process.env.QSTASH_TOKEN;
@@ -39,7 +60,7 @@ function getWorkflowClient() {
   return new WorkflowClient({ token: getQstashToken() });
 }
 
-export function buildCronExpression(config?: TriggerSourceConfig["cron"]) {
+export function buildCronExpression(config?: TriggerCronConfig) {
   const normalizedConfig = normalizeCronConfig(config);
 
   if (!normalizedConfig) {
@@ -64,7 +85,7 @@ export function buildCronExpression(config?: TriggerSourceConfig["cron"]) {
   return `${minute} ${hour} * * *`;
 }
 
-export function normalizeCronConfig(config?: TriggerSourceConfig["cron"]) {
+export function normalizeCronConfig(config?: TriggerCronConfig) {
   if (!config) {
     return undefined;
   }
@@ -145,7 +166,7 @@ export async function triggerScheduleNow(
 }
 
 export async function triggerEventNow(
-  payload: EventWorkflowPayload,
+  payload: EventWorkflowPayloadInput,
   options?: { delay?: WorkflowDelay }
 ) {
   const client = getWorkflowClient();
@@ -162,9 +183,7 @@ export async function triggerEventNow(
   return result.workflowRunId;
 }
 
-export async function triggerOnDemandContent(
-  payload: OnDemandContentWorkflowPayload
-) {
+export async function triggerOnDemandContent(payload: unknown) {
   const client = getWorkflowClient();
   const appUrl = getAppUrl();
 
