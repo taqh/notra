@@ -8,6 +8,7 @@ import { loadGoogleFont } from "@/utils/og";
 export const runtime = "nodejs";
 
 const SIZE = { width: 1200, height: 630 };
+const WHITESPACE_REGEX = /\s+/;
 
 const SUGGESTIONS = [
   {
@@ -54,7 +55,9 @@ function formatLongDate(now: Date): string {
 function BrainIcon() {
   return (
     <svg
+      aria-hidden="true"
       fill="none"
+      focusable="false"
       height="14"
       stroke="rgba(15,15,15,0.85)"
       strokeLinecap="round"
@@ -73,7 +76,9 @@ function BrainIcon() {
 function PlusIcon() {
   return (
     <svg
+      aria-hidden="true"
       fill="none"
+      focusable="false"
       height="13"
       stroke="rgba(15,15,15,0.55)"
       strokeLinecap="round"
@@ -92,7 +97,9 @@ function PlusIcon() {
 function PaperclipIcon() {
   return (
     <svg
+      aria-hidden="true"
       fill="none"
+      focusable="false"
       height="14"
       stroke="rgba(15,15,15,0.7)"
       strokeLinecap="round"
@@ -117,7 +124,7 @@ export async function GET(request: NextRequest) {
     return new Response("Invalid query params", { status: 400 });
   }
 
-  const firstName = parsed.data.name?.split(/\s+/)[0];
+  const firstName = parsed.data.name?.split(WHITESPACE_REGEX)[0];
 
   const now = new Date();
   const dateStr = formatLongDate(now);
@@ -126,7 +133,9 @@ export async function GET(request: NextRequest) {
 
   const fontText = `${dateStr} ${headline} ${SUGGESTIONS.map(
     (s) => `${s.title} ${s.prompt}`
-  ).join(" ")} Send a message... (type @ to add context) Add context Medium Auto Send N ↵ …`;
+  ).join(
+    " "
+  )} Send a message... (type @ to add context) Add context Medium Auto Send N ↵ …`;
 
   const [interRegular, interMedium, interSemibold, bgJpg, notraSvg] =
     await Promise.all([
@@ -308,7 +317,9 @@ export async function GET(request: NextRequest) {
                   <span>Add context</span>
                 </div>
 
-                <div style={{ display: "flex", marginLeft: "auto", gap: "6px" }}>
+                <div
+                  style={{ display: "flex", marginLeft: "auto", gap: "6px" }}
+                >
                   <div
                     style={{
                       display: "flex",
@@ -378,8 +389,7 @@ export async function GET(request: NextRequest) {
                   display: "flex",
                   flexDirection: "column",
                   padding: "10px 4px",
-                  borderTop:
-                    i === 0 ? "none" : "1px solid rgba(0, 0, 0, 0.1)",
+                  borderTop: i === 0 ? "none" : "1px solid rgba(0, 0, 0, 0.1)",
                 }}
               >
                 <div
