@@ -26,7 +26,6 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
-import { addAnthropicPromptCaching } from "../utils/prompt-caching";
 import {
   hasEnabledGitHubIntegration,
   hasEnabledLinearIntegration,
@@ -196,9 +195,6 @@ export async function orchestrateStandaloneChat(
     stopWhen: stepCountIs(isSimpleNoTools ? 1 : maxSteps),
     experimental_transform: smoothStream(),
     providerOptions,
-    prepareStep: ({ messages: stepMessages }) => ({
-      messages: addAnthropicPromptCaching(stepMessages, routingDecision.model),
-    }),
     abortSignal,
     experimental_telemetry: buildExperimentalTelemetry(telemetryMetadata),
     onChunk({ chunk }) {

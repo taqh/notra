@@ -18,7 +18,6 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
-import { addAnthropicPromptCaching } from "../utils/prompt-caching";
 import {
   hasEnabledGitHubIntegration,
   hasEnabledLinearIntegration,
@@ -132,9 +131,6 @@ export async function orchestrateChat(
     }),
     tools,
     stopWhen: stepCountIs(maxSteps),
-    prepareStep: ({ messages: stepMessages }) => ({
-      messages: addAnthropicPromptCaching(stepMessages, routingDecision.model),
-    }),
     experimental_telemetry: buildExperimentalTelemetry(telemetryMetadata),
     async onFinish({ totalUsage }) {
       await deps?.onUsage?.(totalUsage, routingDecision.model);
