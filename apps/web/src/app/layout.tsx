@@ -1,8 +1,9 @@
-import { Databuddy, FlagsProvider } from "@databuddy/sdk/react";
-import { Analytics } from "@vercel/analytics/next";
+import { C15tPrefetch } from "@c15t/nextjs";
+import { FlagsProvider } from "@databuddy/sdk/react";
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
 import { Toaster } from "sonner";
+import { ConsentManager } from "../components/consent-manager";
 import FooterSection from "../components/footer-section";
 import { Navbar } from "../components/navbar";
 import { ThemeProvider } from "../components/theme-provider";
@@ -101,6 +102,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${instrumentSerif.variable} antialiased`}
       >
+        <C15tPrefetch backendURL="/api/c15t" />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -111,7 +113,8 @@ export default function RootLayout({
             clientId={databuddyClientId ?? ""}
             disabled={!databuddyClientId}
           >
-            <div className="relative flex min-h-screen w-full flex-col items-center justify-start bg-background">
+            <ConsentManager>
+              <div className="relative flex min-h-screen w-full flex-col items-center justify-start bg-background">
               <div className="relative flex w-full flex-col items-center justify-start">
                 <div className="relative flex w-full max-w-none flex-col items-start justify-start px-4 sm:px-6 md:px-8 lg:w-7xl lg:max-w-7xl lg:px-0">
                   <div className="absolute top-0 left-4 z-0 h-full w-px bg-border/60 sm:left-6 md:left-8 lg:left-0" />
@@ -127,17 +130,10 @@ export default function RootLayout({
                 </div>
               </div>
             </div>
+            </ConsentManager>
           </FlagsProvider>
           <Toaster position="bottom-right" />
-          {databuddyClientId && (
-            <Databuddy
-              clientId={databuddyClientId}
-              trackAttributes={true}
-              trackErrors={true}
-              trackHashChanges={true}
-            />
-          )}
-          <Analytics />
+
         </ThemeProvider>
       </body>
     </html>
