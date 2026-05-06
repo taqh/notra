@@ -17,39 +17,7 @@ import type {
   QueueBrandAnalysisInput,
   QueueBrandAnalysisResult,
 } from "@/types/brand-analysis";
-
-const DEFAULT_BRAND_CONSTRAINT = "brandSettings_org_default_uidx";
-
-function isDefaultBrandConstraintViolation(error: unknown) {
-  if (!(typeof error === "object" && error !== null)) {
-    return false;
-  }
-  const candidates: unknown[] = [error];
-  if ("cause" in error) {
-    candidates.push((error as { cause: unknown }).cause);
-  }
-  return candidates.some((candidate) => {
-    if (!(typeof candidate === "object" && candidate !== null)) {
-      return false;
-    }
-    if (
-      "constraint_name" in candidate &&
-      candidate.constraint_name === DEFAULT_BRAND_CONSTRAINT
-    ) {
-      return true;
-    }
-    if (
-      "constraint" in candidate &&
-      candidate.constraint === DEFAULT_BRAND_CONSTRAINT
-    ) {
-      return true;
-    }
-    if (candidate instanceof Error) {
-      return candidate.message.includes(DEFAULT_BRAND_CONSTRAINT);
-    }
-    return false;
-  });
-}
+import { isDefaultBrandConstraintViolation } from "@/utils/brand-settings";
 
 async function insertBrandIdentity({
   organizationId,

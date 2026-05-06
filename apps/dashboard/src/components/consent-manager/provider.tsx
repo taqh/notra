@@ -1,12 +1,12 @@
 "use client";
 
+import { DevTools } from "@c15t/dev-tools/react";
 import {
   ConsentBanner,
   ConsentDialog,
   type ConsentManagerOptions,
   ConsentManagerProvider,
 } from "@c15t/nextjs";
-import { DevTools } from "@c15t/dev-tools/react";
 
 import { consentTheme } from "@/lib/consent-manager/theme";
 import type { ConsentManagerProviderProps } from "@/types/consent-manager";

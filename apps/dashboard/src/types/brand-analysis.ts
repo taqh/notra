@@ -1,3 +1,20 @@
+import type { ProgressStatus } from "@/types/hooks/brand-analysis";
+
+export interface DefaultBrandSettingsData {
+  websiteUrl: string;
+  companyName: string;
+  companyDescription: string;
+  toneProfile: string;
+  customTone: string | null;
+  audience: string;
+  language: string;
+}
+
+export type BrandAnalysisStep = Extract<
+  ProgressStatus,
+  "scraping" | "extracting" | "saving"
+>;
+
 export interface QueueBrandAnalysisInput {
   organizationId: string;
   websiteUrl: string;
