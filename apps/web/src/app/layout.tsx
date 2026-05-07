@@ -1,5 +1,5 @@
 import { C15tPrefetch } from "@c15t/nextjs";
-import { FlagsProvider } from "@databuddy/sdk/react";
+import { Databuddy, FlagsProvider } from "@databuddy/sdk/react";
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
 import { Toaster } from "sonner";
@@ -113,6 +113,14 @@ export default function RootLayout({
             clientId={databuddyClientId ?? ""}
             disabled={!databuddyClientId}
           >
+            {databuddyClientId && (
+              <Databuddy
+                clientId={databuddyClientId}
+                trackAttributes={true}
+                trackErrors={true}
+                trackHashChanges={true}
+              />
+            )}
             <ConsentManager>
               <div className="relative flex min-h-screen w-full flex-col items-center justify-start bg-background">
                 <div className="relative flex w-full flex-col items-center justify-start">

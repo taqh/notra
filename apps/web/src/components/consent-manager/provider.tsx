@@ -11,7 +11,6 @@ import {
 import { consentTheme } from "@/lib/consent-manager/theme";
 import type { ConsentManagerProviderProps } from "@/types/consent-manager";
 
-const databuddyClientId = process.env.NEXT_PUBLIC_DATABUDDY_WEB_WEBSITE_ID;
 const vercelAnalyticsScriptSrc =
   process.env.NODE_ENV === "development"
     ? "https://va.vercel-scripts.com/v1/script.debug.js"
@@ -25,7 +24,7 @@ type VercelAnalyticsWindow = typeof window & {
 };
 
 function createConsentScripts(): ConsentScripts {
-  const scripts: ConsentScripts = [
+  return [
     {
       id: "vercel-analytics",
       src: vercelAnalyticsScriptSrc,
@@ -47,26 +46,6 @@ function createConsentScripts(): ConsentScripts {
       },
     },
   ];
-
-  if (databuddyClientId) {
-    scripts.push({
-      id: "databuddy",
-      src: "https://cdn.databuddy.cc/databuddy.js",
-      category: "measurement",
-      async: true,
-      attributes: {
-        crossorigin: "anonymous",
-        "data-client-id": databuddyClientId,
-        "data-databuddy-injected": "true",
-        "data-sdk-version": "2.4.1",
-        "data-track-attributes": "true",
-        "data-track-errors": "true",
-        "data-track-hash-changes": "true",
-      },
-    });
-  }
-
-  return scripts;
 }
 
 const baseOptions = {
