@@ -57,13 +57,10 @@ async function createMemoryEntry({
     return null;
   }
 
-  const dataSnippet = JSON.stringify({ eventType, repository, action, data });
-  let text = `GitHub ${eventType} event for ${repository} (${action}).`;
-  if (dataSnippet) {
-    text += `\n\nData:\n${dataSnippet}`;
-  }
+  const content = JSON.stringify({ eventType, repository, action, data });
+  const context = `GitHub ${eventType} event for ${repository} (${action}).`;
 
-  if (!text.trim()) {
+  if (!content.trim()) {
     return null;
   }
 
@@ -74,7 +71,8 @@ async function createMemoryEntry({
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      content: text.trim(),
+      content: content.trim(),
+      context,
       containerTag: organizationId,
       customId,
       metadata: {
