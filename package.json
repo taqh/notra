@@ -24,7 +24,7 @@
     "drizzle-orm": "^0.45.2",
     "knip": "^6.12.1",
     "openlogs": "^0.0.1",
-    "turbo": "^2.9.9",
+    "turbo": "^2.9.10",
     "ultracite": "7.1.4"
   },
   "engines": {
