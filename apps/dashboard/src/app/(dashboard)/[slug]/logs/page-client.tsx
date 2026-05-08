@@ -231,6 +231,20 @@ export default function PageClient({ organizationSlug }: PageClientProps) {
           <DataTable
             columns={columns}
             data={data?.logs ?? []}
+            emptyState={
+              filtersActive
+                ? {
+                    title: "No logs match your filters",
+                    description: "Try a different search, source, or status.",
+                    actionLabel: "Reset filters",
+                    onActionClick: resetFilters,
+                  }
+                : {
+                    title: "No logs yet",
+                    description:
+                      "Activity from your integrations and automations will show up here.",
+                  }
+            }
             onPageChange={setPage}
             page={page}
             totalPages={data?.pagination.totalPages ?? 1}
