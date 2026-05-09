@@ -11,7 +11,7 @@ import {
 } from "@notra/content-generation/databuddy";
 
 const apiKey = process.env.DATABUDDY_API_KEY;
-const websiteId = process.env.DATABUDDY_DASHBOARD_WEBSITE_ID;
+const websiteId = process.env.NEXT_PUBLIC_DATABUDDY_DASHBOARD_WEBSITE_ID;
 
 if (!apiKey) {
   console.warn(
@@ -21,7 +21,7 @@ if (!apiKey) {
 
 if (!websiteId) {
   console.warn(
-    "DATABUDDY_DASHBOARD_WEBSITE_ID not configured. Server-side Databuddy tracking will be disabled."
+    "NEXT_PUBLIC_DATABUDDY_DASHBOARD_WEBSITE_ID not configured. Server-side Databuddy tracking will be disabled."
   );
 }
 
