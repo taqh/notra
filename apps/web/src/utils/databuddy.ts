@@ -16,4 +16,3 @@ export const serializeSignupAttribution = createSerializer(
     urlKeys: signupAttributionUrlKeys,
   }
 );
-
