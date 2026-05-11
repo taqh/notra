@@ -158,6 +158,12 @@ export default function FooterSection() {
               >
                 Legal Notice
               </Link>
+              <Link
+                className="font-normal font-sans text-foreground text-sm leading-5 transition-colors hover:text-primary"
+                href="/subprocessors"
+              >
+                Subprocessors
+              </Link>
             </div>
           </div>
         </div>
