@@ -5,10 +5,12 @@ import {
   TWEET_URL_REGEX,
 } from "@/constants/twitter";
 
+const URL_PROTOCOL_REGEX = /^https?:\/\//i;
+
 function getTweetTokenUrl(token: string): string | undefined {
   if (TWEET_URL_REGEX.test(token)) {
     TWEET_URL_REGEX.lastIndex = 0;
-    return token;
+    return URL_PROTOCOL_REGEX.test(token) ? token : `https://${token}`;
   }
   if (TWEET_MENTION_REGEX.test(token)) {
     TWEET_MENTION_REGEX.lastIndex = 0;
