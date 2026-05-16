@@ -290,7 +290,7 @@ export function BlogChangelogPreview({
                 disabled={effectiveState === "loading"}
                 onClick={handleApprove}
                 size="sm"
-                variant="secondary"
+                variant="outline"
               >
                 {effectiveState === "loading" ? (
                   <>
