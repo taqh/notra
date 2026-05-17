@@ -4,14 +4,6 @@ import { StackAuth } from "@notra/ui/components/ui/svgs/stack-auth";
 import { Stagewise } from "@notra/ui/components/ui/svgs/stagewise";
 import type { ComponentType, SVGProps } from "react";
 
-export const SOCIAL_LINKS = {
-  x: "/x",
-  linkedin: "/linkedin",
-  github: "/github",
-  discord: "/discord",
-  reddit: "/reddit",
-} as const;
-
 export const NOTRA_LOGO_PATH = "/notra-mark.svg";
 
 export const RSS_FEED_PATH = "/rss.xml";

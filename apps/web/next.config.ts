@@ -3,6 +3,7 @@ import { withDualmark } from "@dualmark/nextjs";
 import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 import { SHOWCASE_COMPANIES } from "./src/utils/showcase";
+import { SOCIAL_LINKS } from "./src/utils/social-links";
 import { SITE_URL } from "./src/utils/urls";
 
 const SHOWCASE_COMPANY_SLUGS = SHOWCASE_COMPANIES.map(
@@ -56,27 +57,27 @@ const nextConfig: NextConfig = {
     },
     {
       source: "/discord",
-      destination: "https://discord.gg/2qzGZDsnwB",
+      destination: SOCIAL_LINKS.discord,
       permanent: false,
     },
     {
       source: "/x",
-      destination: "https://x.com/usenotra",
+      destination: SOCIAL_LINKS.x,
       permanent: false,
     },
     {
       source: "/linkedin",
-      destination: "https://www.linkedin.com/company/usenotra",
+      destination: SOCIAL_LINKS.linkedin,
       permanent: false,
     },
     {
       source: "/github",
-      destination: "https://github.com/usenotra/notra",
+      destination: SOCIAL_LINKS.github,
       permanent: false,
     },
     {
       source: "/reddit",
-      destination: "https://www.reddit.com/r/notra/",
+      destination: SOCIAL_LINKS.reddit,
       permanent: false,
     },
   ],

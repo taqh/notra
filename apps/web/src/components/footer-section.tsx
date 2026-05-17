@@ -12,7 +12,7 @@ import {
   FOOTER_PRODUCT_LINKS,
   FOOTER_TOOL_LINKS,
 } from "@/utils/navigation";
-import { SOCIAL_LINKS } from "../utils/constants";
+import { SOCIAL_LINKS } from "../utils/social-links";
 import { NotraMark } from "./notra-mark";
 import { TrackedAiSummaryLink } from "./tracked-ai-summary-link";
 
