@@ -35,6 +35,8 @@ import {
 
 const DEFAULT_AUTHOR_NAME = "Your name";
 const DEFAULT_AUTHOR_HANDLE = "yourhandle";
+const LEADING_AT_REGEX = /^@/;
+const WHITESPACE_REGEX = /\s+/;
 
 interface InlineEditableProps {
   value: string;
@@ -141,21 +143,13 @@ export default function ThreadBuilder() {
     };
   }, [authorAvatar]);
 
-  useEffect(() => {
-    const next = focusNextRef.current;
-    if (!next) return;
-    const el = textareaRefs.current.get(next);
-    el?.focus();
-    focusNextRef.current = null;
-  }, [posts]);
-
   const trimmedName = authorName.trim();
   const previewName = trimmedName || DEFAULT_AUTHOR_NAME;
   const previewHandle =
-    authorHandle.trim().replace(/^@/, "") || DEFAULT_AUTHOR_HANDLE;
+    authorHandle.trim().replace(LEADING_AT_REGEX, "") || DEFAULT_AUTHOR_HANDLE;
   const avatarInitials = trimmedName
     ? trimmedName
-        .split(/\s+/)
+        .split(WHITESPACE_REGEX)
         .slice(0, 2)
         .map((part) => part[0]?.toUpperCase() ?? "")
         .join("")
@@ -166,6 +160,10 @@ export default function ThreadBuilder() {
     (id: string) => (el: HTMLTextAreaElement | null) => {
       if (el) {
         textareaRefs.current.set(id, el);
+        if (focusNextRef.current === id) {
+          el.focus();
+          focusNextRef.current = null;
+        }
       } else {
         textareaRefs.current.delete(id);
       }
@@ -183,9 +181,13 @@ export default function ThreadBuilder() {
     const fresh = createEmptyPost();
     focusNextRef.current = fresh.id;
     setPosts((current) => {
-      if (!id) return [...current, fresh];
+      if (!id) {
+        return [...current, fresh];
+      }
       const index = current.findIndex((post) => post.id === id);
-      if (index === -1) return [...current, fresh];
+      if (index === -1) {
+        return [...current, fresh];
+      }
       const next = current.slice();
       next.splice(index + 1, 0, fresh);
       return next;
@@ -205,7 +207,9 @@ export default function ThreadBuilder() {
 
   function handleAvatarPick(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     if (authorAvatar?.startsWith("blob:")) {
       URL.revokeObjectURL(authorAvatar);
     }
@@ -214,7 +218,7 @@ export default function ThreadBuilder() {
   }
 
   function handleHandleChange(next: string) {
-    setAuthorHandle(next.replace(/^@/, ""));
+    setAuthorHandle(next.replace(LEADING_AT_REGEX, ""));
   }
 
   function handleDragStart(id: string, event: DragEvent<HTMLElement>) {
@@ -224,10 +228,14 @@ export default function ThreadBuilder() {
   }
 
   function handleDragOver(id: string, event: DragEvent<HTMLLIElement>) {
-    if (!dragId) return;
+    if (!dragId) {
+      return;
+    }
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    if (dragOverId !== id) setDragOverId(id);
+    if (dragOverId !== id) {
+      setDragOverId(id);
+    }
   }
 
   function handleDrop(targetId: string, event: DragEvent<HTMLLIElement>) {
@@ -235,13 +243,21 @@ export default function ThreadBuilder() {
     const sourceId = dragId ?? event.dataTransfer.getData("text/plain");
     setDragId(null);
     setDragOverId(null);
-    if (!sourceId || sourceId === targetId) return;
+    if (!sourceId || sourceId === targetId) {
+      return;
+    }
     setPosts((current) => {
       const fromIndex = current.findIndex((post) => post.id === sourceId);
       const toIndex = current.findIndex((post) => post.id === targetId);
-      if (fromIndex === -1 || toIndex === -1) return current;
+      if (fromIndex === -1 || toIndex === -1) {
+        return current;
+      }
+      const moved = current[fromIndex];
+      if (!moved) {
+        return current;
+      }
       const next = current.slice();
-      const [moved] = next.splice(fromIndex, 1);
+      next.splice(fromIndex, 1);
       next.splice(toIndex, 0, moved);
       return next;
     });
@@ -284,16 +300,19 @@ export default function ThreadBuilder() {
             dragOverId === post.id && dragId !== null && dragId !== post.id;
           const length = post.content.length;
           const overLimit = length > THREAD_POST_LIMIT;
-          const counterColor = overLimit
-            ? "text-destructive"
-            : length > THREAD_POST_LIMIT - 20
-              ? "text-amber-500"
-              : "text-muted-foreground/70";
+          const nearLimit = length > THREAD_POST_LIMIT - 20;
+          let counterColor = "text-muted-foreground/70";
+          if (overLimit) {
+            counterColor = "text-destructive";
+          } else if (nearLimit) {
+            counterColor = "text-amber-500";
+          }
           const isSoloEmpty = posts.length === 1 && length === 0;
           const showDelete = !isSoloEmpty;
           const showDrag = hasMultiplePosts;
 
           return (
+            // biome-ignore lint/a11y/noNoninteractiveElementInteractions: list item acts as a drag-and-drop target; reorder is also accessible via per-item buttons
             <li
               className={cn(
                 "group/post relative flex gap-3 rounded-lg px-2 py-3 transition-colors focus-within:bg-muted/50 hover:bg-muted/40",
