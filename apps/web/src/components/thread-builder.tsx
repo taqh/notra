@@ -291,7 +291,7 @@ export default function ThreadBuilder() {
       <ol className="relative flex flex-col">
         <div
           aria-hidden
-          className="pointer-events-none absolute top-10 bottom-10 left-5 w-px bg-border"
+          className="pointer-events-none absolute top-10 bottom-10 left-7 w-px bg-border"
         />
 
         {posts.map((post, index) => {
