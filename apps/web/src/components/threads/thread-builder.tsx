@@ -3,9 +3,8 @@
 import {
   Add01Icon,
   Cancel01Icon,
-  Edit02Icon,
+  DragDropVerticalIcon,
   Image01Icon,
-  Menu02Icon,
   User02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -32,95 +31,19 @@ import {
   THREAD_POST_LIMIT,
   type ThreadPost,
 } from "@/types/threads";
+import { InlineEditable } from "./inline-editable";
 
 const DEFAULT_AUTHOR_NAME = "Your name";
 const DEFAULT_AUTHOR_HANDLE = "yourhandle";
 const LEADING_AT_REGEX = /^@/;
 const WHITESPACE_REGEX = /\s+/;
+const THREAD_POST_SELECTOR = "[data-thread-post-id]";
 
-interface InlineEditableProps {
-  value: string;
-  onChange: (next: string) => void;
-  placeholder: string;
-  prefix?: string;
-  className?: string;
-  ariaLabel: string;
-  maxLength: number;
-}
-
-function InlineEditable({
-  value,
-  onChange,
-  placeholder,
-  prefix,
-  className,
-  ariaLabel,
-  maxLength,
-}: InlineEditableProps) {
-  const [editing, setEditing] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (editing) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }
-  }, [editing]);
-
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter" || event.key === "Escape") {
-      event.preventDefault();
-      setEditing(false);
-    }
-  }
-
-  if (editing) {
-    return (
-      <span className="inline-flex items-center">
-        {prefix && (
-          <span className={cn("pointer-events-none", className)}>{prefix}</span>
-        )}
-        <input
-          aria-label={ariaLabel}
-          className={cn(
-            "min-w-4 rounded-sm bg-background px-1 outline-none ring-2 ring-primary/60",
-            className
-          )}
-          maxLength={maxLength}
-          onBlur={() => setEditing(false)}
-          onChange={(event) => onChange(event.target.value)}
-          onKeyDown={handleKeyDown}
-          ref={inputRef}
-          size={Math.max(value.length, placeholder.length, 4)}
-          value={value}
-        />
-      </span>
-    );
-  }
-
-  const display = value.trim() ? value : placeholder;
-  const isPlaceholder = !value.trim();
-  return (
-    <button
-      aria-label={ariaLabel}
-      className={cn(
-        "group/edit inline-flex max-w-full cursor-text items-center gap-1 truncate rounded-sm px-1 text-left transition-colors hover:bg-muted/70 hover:underline hover:decoration-foreground/40 hover:decoration-dashed hover:underline-offset-4 focus-visible:bg-muted/70 focus-visible:outline-none",
-        className,
-        isPlaceholder && "font-normal text-muted-foreground/60"
-      )}
-      onClick={() => setEditing(true)}
-      type="button"
-    >
-      <span className="truncate">
-        {prefix}
-        {display}
-      </span>
-      <HugeiconsIcon
-        className="size-3 shrink-0 opacity-0 transition-opacity group-hover/edit:opacity-100 group-focus-visible/edit:opacity-100"
-        icon={Edit02Icon}
-      />
-    </button>
-  );
+function getAddPostShortcut() {
+  const isMac =
+    typeof navigator !== "undefined" &&
+    navigator.platform.toUpperCase().includes("MAC");
+  return isMac ? "⌘ + Enter" : "Ctrl + Enter";
 }
 
 export default function ThreadBuilder() {
@@ -132,6 +55,8 @@ export default function ThreadBuilder() {
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  const completedDropRef = useRef(false);
   const textareaRefs = useRef(new Map<string, HTMLTextAreaElement>());
   const focusNextRef = useRef<string | null>(null);
 
@@ -144,6 +69,7 @@ export default function ThreadBuilder() {
   }, [authorAvatar]);
 
   const trimmedName = authorName.trim();
+  const addPostShortcut = getAddPostShortcut();
   const previewName = trimmedName || DEFAULT_AUTHOR_NAME;
   const previewHandle =
     authorHandle.trim().replace(LEADING_AT_REGEX, "") || DEFAULT_AUTHOR_HANDLE;
@@ -222,30 +148,13 @@ export default function ThreadBuilder() {
   }
 
   function handleDragStart(id: string, event: DragEvent<HTMLElement>) {
+    completedDropRef.current = false;
     setDragId(id);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", id);
   }
 
-  function handleDragOver(id: string, event: DragEvent<HTMLLIElement>) {
-    if (!dragId) {
-      return;
-    }
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    if (dragOverId !== id) {
-      setDragOverId(id);
-    }
-  }
-
-  function handleDrop(targetId: string, event: DragEvent<HTMLLIElement>) {
-    event.preventDefault();
-    const sourceId = dragId ?? event.dataTransfer.getData("text/plain");
-    setDragId(null);
-    setDragOverId(null);
-    if (!sourceId || sourceId === targetId) {
-      return;
-    }
+  function movePost(sourceId: string, targetId: string) {
     setPosts((current) => {
       const fromIndex = current.findIndex((post) => post.id === sourceId);
       const toIndex = current.findIndex((post) => post.id === targetId);
@@ -263,9 +172,93 @@ export default function ThreadBuilder() {
     });
   }
 
-  function handleDragEnd() {
+  function getPostIdFromY(clientY: number, list = listRef.current) {
+    if (!list) {
+      return null;
+    }
+    const items = Array.from(
+      list.querySelectorAll<HTMLElement>(THREAD_POST_SELECTOR)
+    );
+    let closestId: string | null = null;
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    for (const item of items) {
+      const rect = item.getBoundingClientRect();
+      const itemCenter = rect.top + rect.height / 2;
+      const distance = Math.abs(clientY - itemCenter);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestId = item.dataset.threadPostId ?? null;
+      }
+    }
+
+    return closestId;
+  }
+
+  function handleDragOver(event: DragEvent<HTMLOListElement>) {
+    if (!dragId) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    const targetId = getPostIdFromY(event.clientY, event.currentTarget);
+    if (targetId && dragOverId !== targetId) {
+      setDragOverId(targetId);
+    }
+  }
+
+  function handleTargetDragOver(id: string, event: DragEvent<HTMLElement>) {
+    if (!dragId) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "move";
+    if (dragOverId !== id) {
+      setDragOverId(id);
+    }
+  }
+
+  function handleTargetDrop(targetId: string, event: DragEvent<HTMLElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    const sourceId = dragId ?? event.dataTransfer.getData("text/plain");
     setDragId(null);
     setDragOverId(null);
+    if (!(sourceId && targetId) || sourceId === targetId) {
+      return;
+    }
+    completedDropRef.current = true;
+    movePost(sourceId, targetId);
+  }
+
+  function handleDrop(event: DragEvent<HTMLOListElement>) {
+    event.preventDefault();
+    const sourceId = dragId ?? event.dataTransfer.getData("text/plain");
+    const targetId = dragOverId ?? getPostIdFromY(event.clientY);
+    setDragId(null);
+    setDragOverId(null);
+    if (!(sourceId && targetId) || sourceId === targetId) {
+      return;
+    }
+    completedDropRef.current = true;
+    movePost(sourceId, targetId);
+  }
+
+  function handleDragEnd(sourceId: string, event: DragEvent<HTMLElement>) {
+    if (completedDropRef.current) {
+      completedDropRef.current = false;
+      setDragId(null);
+      setDragOverId(null);
+      return;
+    }
+    const targetId = dragOverId ?? getPostIdFromY(event.clientY);
+    setDragId(null);
+    setDragOverId(null);
+    if (targetId && sourceId !== targetId) {
+      movePost(sourceId, targetId);
+    }
   }
 
   function handlePostKeyDown(
@@ -279,7 +272,7 @@ export default function ThreadBuilder() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-5">
+    <div className="mx-auto w-full max-w-2xl p-3 sm:p-5">
       <input
         accept="image/*"
         className="hidden"
@@ -288,12 +281,17 @@ export default function ThreadBuilder() {
         type="file"
       />
 
-      <ol className="relative flex flex-col">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute top-10 bottom-10 left-7 w-px bg-border"
-        />
+      <p className="mb-5 text-center font-normal font-sans text-muted-foreground text-xs leading-5">
+        Click the name, handle, or avatar to customize the author.
+      </p>
 
+      {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: list handles native drag-and-drop targets; reorder controls remain keyboard accessible */}
+      <ol
+        className="relative flex flex-col gap-2"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        ref={listRef}
+      >
         {posts.map((post, index) => {
           const isDragging = dragId === post.id;
           const isDropTarget =
@@ -310,19 +308,26 @@ export default function ThreadBuilder() {
           const isSoloEmpty = posts.length === 1 && length === 0;
           const showDelete = !isSoloEmpty;
           const showDrag = hasMultiplePosts;
+          const showConnector = index < posts.length - 1;
 
           return (
-            // biome-ignore lint/a11y/noNoninteractiveElementInteractions: list item acts as a drag-and-drop target; reorder is also accessible via per-item buttons
             <li
               className={cn(
-                "group/post relative flex gap-3 rounded-lg px-2 py-3 transition-colors focus-within:bg-muted/50 hover:bg-muted/40",
+                "group/post relative flex gap-3 rounded-xl p-3 transition-colors focus-within:bg-muted/50 hover:bg-muted/40",
                 isDragging && "opacity-50",
                 isDropTarget && "bg-primary/5 ring-1 ring-primary/40"
               )}
+              data-thread-post-id={post.id}
               key={post.id}
-              onDragOver={(event) => handleDragOver(post.id, event)}
-              onDrop={(event) => handleDrop(post.id, event)}
             >
+              {showConnector && (
+                <div
+                  aria-hidden
+                  className="-translate-x-1/2 pointer-events-none absolute top-13 bottom-[-1.375rem] left-8 w-px bg-border"
+                  data-thread-connector
+                />
+              )}
+
               <button
                 aria-label="Change avatar"
                 className="group/avatar relative z-10 size-10 shrink-0 cursor-pointer rounded-full bg-background outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -344,7 +349,7 @@ export default function ThreadBuilder() {
                 </span>
               </button>
 
-              <div className="flex min-w-0 flex-1 flex-col gap-1 pt-0.5">
+              <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
                 <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
                   <InlineEditable
                     ariaLabel="Edit display name"
@@ -389,17 +394,26 @@ export default function ThreadBuilder() {
                 </span>
               </div>
 
-              <div className="absolute top-3 right-2 flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover/post:opacity-100">
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: controls rail is part of the native drag-and-drop target area */}
+              {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: controls rail catches drops released outside the card body */}
+              <div
+                className="-right-18 absolute top-3 flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover/post:opacity-100"
+                onDragOver={(event) => handleTargetDragOver(post.id, event)}
+                onDrop={(event) => handleTargetDrop(post.id, event)}
+              >
                 {showDrag && (
                   <button
                     aria-label={`Drag post ${index + 1}`}
                     className="flex size-7 cursor-grab items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing"
                     draggable
-                    onDragEnd={handleDragEnd}
+                    onDragEnd={(event) => handleDragEnd(post.id, event)}
                     onDragStart={(event) => handleDragStart(post.id, event)}
                     type="button"
                   >
-                    <HugeiconsIcon className="size-4" icon={Menu02Icon} />
+                    <HugeiconsIcon
+                      className="size-4"
+                      icon={DragDropVerticalIcon}
+                    />
                   </button>
                 )}
                 {showDelete && (
@@ -418,15 +432,7 @@ export default function ThreadBuilder() {
         })}
       </ol>
 
-      <div className="mt-4 flex flex-col-reverse items-stretch gap-3 pl-13 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-0.5">
-          <p className="font-normal font-sans text-muted-foreground text-xs leading-5">
-            Click the name, handle, or avatar to customize the author.
-          </p>
-          <p className="hidden font-normal font-sans text-muted-foreground/70 text-xs leading-5 sm:block">
-            Shortcut: ⌘/Ctrl + Enter adds a post.
-          </p>
-        </div>
+      <div className="mt-8 flex flex-col-reverse items-stretch gap-3 sm:flex-col sm:items-center sm:justify-between">
         <Button
           className="sm:w-auto"
           onClick={() => addPostAfter()}
@@ -436,6 +442,10 @@ export default function ThreadBuilder() {
           <HugeiconsIcon className="size-3.5" icon={Add01Icon} />
           <span>Add post</span>
         </Button>
+        <p className="hidden font-normal font-sans text-muted-foreground/70 text-xs leading-5 sm:block">
+          <span suppressHydrationWarning>{addPostShortcut}</span> when an input
+          is focused adds a post.
+        </p>
       </div>
     </div>
   );
