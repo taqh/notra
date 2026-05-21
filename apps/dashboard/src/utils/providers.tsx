@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 const databuddyClientID =
   process.env.NEXT_PUBLIC_DATABUDDY_DASHBOARD_WEBSITE_ID;
+const databuddyMaskPatterns = ["/*"];
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -61,6 +62,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               {databuddyClientID && (
                 <Databuddy
                   clientId={databuddyClientID}
+                  maskPatterns={databuddyMaskPatterns}
                   trackAttributes={true}
                   trackErrors={true}
                   trackHashChanges={true}
