@@ -38,7 +38,10 @@ import { sourceMetadataSchema } from "@/schemas/content";
 import type { BrandSettings } from "@/types/hooks/brand-analysis";
 import { getBrandFaviconUrl } from "@/utils/brand";
 import { formatSnakeCaseLabel } from "@/utils/format";
-import { createLinkedInPostUrl } from "@/utils/linkedin";
+import {
+  copyLinkedInPostForPublishing,
+  createLinkedInPostUrl,
+} from "@/utils/linkedin";
 import { createTwitterPostUrl } from "@/utils/twitter";
 import { useContent } from "../../../../../lib/hooks/use-content";
 import { ContentDetailSkeleton } from "./skeleton";
@@ -180,6 +183,10 @@ export default function PageClient({
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [hasChanges]);
+
+  const handlePostToLinkedIn = useCallback(() => {
+    copyLinkedInPostForPublishing(currentMarkdown);
+  }, [currentMarkdown]);
 
   const handleSave = useCallback(async () => {
     if (!hasChanges) {
@@ -806,6 +813,7 @@ export default function PageClient({
                   render={
                     <a
                       href={createLinkedInPostUrl(currentMarkdown)}
+                      onClick={handlePostToLinkedIn}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
