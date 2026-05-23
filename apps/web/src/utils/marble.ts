@@ -34,6 +34,15 @@ function createMarbleClient(apiKey: string) {
   });
 }
 
+function sortMarblePostsByPublishedAt<T extends Pick<Post, "publishedAt">>(
+  posts: T[]
+) {
+  return [...posts].sort(
+    (firstPost, secondPost) =>
+      secondPost.publishedAt.getTime() - firstPost.publishedAt.getTime()
+  );
+}
+
 async function listPostsByFormat(
   client: Marble,
   { category }: ListMarblePublishedPostsOptions,
