@@ -3,15 +3,17 @@
 import {
   Cancel01Icon,
   Copy01Icon,
+  DashboardSquare01Icon,
   Menu02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@notra/ui/components/ui/context-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@notra/ui/components/ui/dropdown-menu";
 import {
   AnimatePresence,
   domAnimation,
@@ -35,6 +37,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { TrackedSignupLink } from "./tracked-signup-link";
 
 const SIGNIN_URL = "https://app.usenotra.com/login";
+const DASHBOARD_URL = "https://app.usenotra.com";
 const HOVER_CLOSE_DELAY = 120;
 const CONTENT_SLIDE = 48;
 const EASE = [0.32, 0.72, 0, 1] as const;
@@ -241,6 +244,7 @@ export function Navbar() {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
+  const [logoMenuOpen, setLogoMenuOpen] = useState(false);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled(latest > SCROLL_THRESHOLD);
@@ -371,13 +375,26 @@ export function Navbar() {
         >
           <div className="px-4 sm:px-6">
             <div className="flex h-16 items-center justify-between gap-4">
-              <ContextMenu>
-                <ContextMenuTrigger
+              <DropdownMenu
+                onOpenChange={(open, details) => {
+                  if (open && details.reason === "trigger-press") {
+                    return;
+                  }
+                  setLogoMenuOpen(open);
+                }}
+                open={logoMenuOpen}
+              >
+                <DropdownMenuTrigger
+                  nativeButton={false}
                   render={
                     <Link
                       aria-label="Notra home"
                       className="flex flex-1 items-center gap-2"
                       href="/"
+                      onContextMenu={(event) => {
+                        event.preventDefault();
+                        setLogoMenuOpen(true);
+                      }}
                     />
                   }
                 >
@@ -387,18 +404,27 @@ export function Navbar() {
                   <span className="font-semibold text-lg text-neutral-950 dark:text-white">
                     Notra
                   </span>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-56"
+                  side="bottom"
+                >
+                  <DropdownMenuItem
                     onClick={() =>
                       copyToClipboard(notraMarkSvgString, "Copied logo as SVG")
                     }
                   >
                     <HugeiconsIcon icon={Copy01Icon} />
                     Copy as SVG
-                  </ContextMenuItem>
-                </ContextMenuContent>
-              </ContextMenu>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem render={<Link href={DASHBOARD_URL} />}>
+                    <HugeiconsIcon icon={DashboardSquare01Icon} />
+                    Dashboard
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: onMouseLeave is a pointer-only convenience to dismiss the hover menu; the menu is fully operable via click, focus, and Escape */}
               <nav
