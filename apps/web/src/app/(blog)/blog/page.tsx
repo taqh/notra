@@ -43,7 +43,7 @@ export default async function BlogPage() {
     return (
       <>
         <div className="flex w-full max-w-[680px] flex-col items-center justify-start gap-4 self-center text-center">
-          <h1 className="text-balance font-sans font-semibold text-3xl text-foreground leading-tight tracking-tight md:text-5xl md:leading-[60px]">
+          <h1 className="text-balance font-sans font-semibold text-4xl text-foreground leading-tight tracking-tight md:text-6xl">
             The Notra <span className="text-primary">Blog</span>
           </h1>
           <div className="text-balance font-sans text-base text-muted-foreground leading-7">
@@ -68,7 +68,7 @@ export default async function BlogPage() {
   return (
     <>
       <div className="flex w-full max-w-[680px] flex-col items-center justify-start gap-4 self-center text-center">
-        <h1 className="text-balance font-sans font-semibold text-3xl text-foreground leading-tight tracking-tight md:text-5xl md:leading-[60px]">
+        <h1 className="text-balance font-sans font-semibold text-4xl text-foreground leading-tight tracking-tight md:text-6xl">
           The Notra <span className="text-primary">Blog</span>
         </h1>
         <div className="text-balance font-sans text-base text-muted-foreground leading-7">

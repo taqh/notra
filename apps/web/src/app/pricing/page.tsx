@@ -100,7 +100,7 @@ export default function PricingPage() {
       <div className="flex w-full flex-col items-center justify-center gap-2">
         <div className="flex items-center justify-center gap-6 self-stretch px-6 py-12 md:px-24 md:py-16">
           <div className="flex w-full max-w-[586px] flex-col items-center justify-start gap-4">
-            <h1 className="self-stretch text-balance text-center font-sans font-semibold text-3xl text-foreground leading-tight tracking-tight md:text-5xl md:leading-[60px]">
+            <h1 className="self-stretch text-balance text-center font-sans font-semibold text-4xl text-foreground leading-tight tracking-tight md:text-6xl">
               Pricing that scales with{" "}
               <span className="text-primary">what you ship</span>
             </h1>
