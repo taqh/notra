@@ -271,7 +271,7 @@ function getLastUserMessage(messages: UIMessage[]): string {
 // survive history trimming before `convertToModelMessages` runs. Missing
 // `approval-responded` here previously dropped the user's approval payload,
 // leaving the conversation ending on an assistant turn — which Bedrock-routed
-// Anthropic (Sonnet 4.6 / Opus 4.7 via AI Gateway) rejects with
+// Anthropic (Sonnet 4.6 / Opus 4.8 via AI Gateway) rejects with
 // "This model does not support assistant message prefill".
 const TERMINAL_TOOL_STATES = new Set([
   "output-available",
@@ -467,7 +467,7 @@ function getThinkingProviderOptions(
 }
 
 function usesAdaptiveThinking(modelId: string): boolean {
-  return modelId === "anthropic/claude-opus-4.7";
+  return modelId === "anthropic/claude-opus-4.8";
 }
 
 function getAnthropicThinkingBudget(

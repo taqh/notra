@@ -26,7 +26,7 @@ const MODELS = {
 const AUTO_POOL = {
   trivial: "anthropic/claude-haiku-4.5",
   everyday: "anthropic/claude-sonnet-4.6",
-  deep: "anthropic/claude-opus-4.7",
+  deep: "anthropic/claude-opus-4.8",
 } as const;
 
 const TRIVIAL_MESSAGE_PATTERNS = [
