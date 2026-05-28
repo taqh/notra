@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
 
+export interface NotraBlogAuthor {
+  id: string;
+  name: string;
+  image: string | null;
+}
+
 export interface NotraBlogPost {
   id: string;
   title: string;
@@ -13,6 +19,7 @@ export interface NotraBlogPost {
   updatedAt: string;
   slug: string;
   excerpt: string;
+  authors: NotraBlogAuthor[];
 }
 
 interface BlogPageHeaderProps {

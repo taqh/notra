@@ -11,7 +11,11 @@ import {
   listMarblePublishedPosts,
   type MarblePublishedPost,
 } from "@/utils/marble";
-import type { BlogTimelineItem, NotraBlogPost } from "~types/blog";
+import type {
+  BlogTimelineItem,
+  NotraBlogAuthor,
+  NotraBlogPost,
+} from "~types/blog";
 
 const BLOG_CONTENT_TYPE = "blog_post";
 const FALLBACK_EXCERPT_MAX_LENGTH = 160;
@@ -70,6 +74,11 @@ function normalizePost(post: MarblePublishedPost): NotraBlogPost {
     apiSlug.length > 0 ? apiSlug : createBlogPostSlug({ title: post.title });
   const createdAt = post.publishedAt.toISOString();
   const markdown = post.markdown || post.content;
+  const authors: NotraBlogAuthor[] = post.authors.map((author) => ({
+    id: author.id,
+    name: author.name,
+    image: author.image,
+  }));
 
   return {
     id: post.id,
@@ -84,6 +93,7 @@ function normalizePost(post: MarblePublishedPost): NotraBlogPost {
     updatedAt: post.updatedAt.toISOString(),
     slug,
     excerpt: post.description.trim() || getPostExcerpt(markdown, post.title),
+    authors,
   };
 }
 

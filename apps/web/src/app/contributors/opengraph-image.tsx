@@ -47,7 +47,7 @@ export default async function Image() {
         flexDirection: "column",
         width: "100%",
         height: "100%",
-        backgroundColor: "#f5f0e8",
+        backgroundColor: "#ffffff",
         padding: "5rem",
         fontFamily: "Inter",
       }}

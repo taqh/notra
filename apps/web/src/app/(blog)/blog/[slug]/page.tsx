@@ -37,13 +37,11 @@ export async function generateMetadata({
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt,
       siteName: "Notra",
-      images: [DEFAULT_SOCIAL_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
-      images: [DEFAULT_SOCIAL_IMAGE.url],
       site: TWITTER_HANDLE,
       creator: TWITTER_HANDLE,
     },

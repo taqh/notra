@@ -21,3 +21,21 @@ export async function loadGoogleFont(family: string, text: string) {
 export function truncate(value: string, max: number) {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value;
 }
+
+export async function loadImageAsDataUrl(url: string | null) {
+  if (!url) {
+    return null;
+  }
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return null;
+    }
+    const input = Buffer.from(await response.arrayBuffer());
+    const { default: sharp } = await import("sharp");
+    const png = await sharp(input).png().toBuffer();
+    return `data:image/png;base64,${png.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
