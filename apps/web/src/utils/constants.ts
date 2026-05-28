@@ -178,7 +178,7 @@ const FEATURES_TABLE = [
       },
       {
         name: "Email support",
-        basic: false,
+        basic: true,
         pro: true,
         enterprise: true,
       },
