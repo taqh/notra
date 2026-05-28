@@ -16,31 +16,41 @@ const description =
   "Choose the right Notra plan for your team. Compare features across Basic, Pro, and Enterprise tiers.";
 const url = `${SITE_URL}/pricing`;
 
-const offers: OfferLike[] = Object.values(PRICING_PLANS).map((plan) => {
+const offers: OfferLike[] = Object.values(PRICING_PLANS).flatMap((plan) => {
   if (plan.pricing.monthly === null) {
-    return {
-      "@type": "Offer",
-      name: `${plan.name} plan`,
-      url,
-      availability: "https://schema.org/InStock",
-      category: plan.name,
-    };
+    return [];
   }
 
-  return {
-    "@type": "Offer",
-    name: `${plan.name} plan`,
-    price: String(plan.pricing.monthly),
-    priceCurrency: "USD",
-    url,
-    availability: "https://schema.org/InStock",
-    category: plan.name,
-  };
+  return [
+    {
+      "@type": "Offer",
+      name: `${plan.name} monthly plan`,
+      description: plan.description,
+      price: plan.pricing.monthly,
+      priceCurrency: "USD",
+      url,
+      availability: "https://schema.org/OnlineOnly",
+      itemCondition: "https://schema.org/NewCondition",
+      category: plan.name,
+    },
+    {
+      "@type": "Offer",
+      name: `${plan.name} annual plan`,
+      description: plan.description,
+      price: plan.pricing.annually,
+      priceCurrency: "USD",
+      url,
+      availability: "https://schema.org/OnlineOnly",
+      itemCondition: "https://schema.org/NewCondition",
+      category: plan.name,
+    },
+  ];
 });
 
 const productJsonLd = buildProductJsonLd({
   name: "Notra",
   description,
+  image: `${SITE_URL}${DEFAULT_SOCIAL_IMAGE.url}`,
   url,
   offers,
 });

@@ -17,17 +17,20 @@ export interface ArticleJsonLdInput {
 export interface OfferLike {
   "@type": "Offer" | "AggregateOffer";
   name?: string;
-  price?: string;
+  description?: string;
+  price?: number;
   priceCurrency?: string;
   priceSpecification?: unknown;
   url?: string;
   availability?: string;
   category?: string;
+  itemCondition?: string;
 }
 
 export interface ProductJsonLdInput {
   name: string;
   description: string;
+  image?: string | string[];
   url: string;
   offers: OfferLike | OfferLike[];
 }

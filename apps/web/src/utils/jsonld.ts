@@ -66,6 +66,7 @@ export function buildArticleJsonLd({
 export function buildProductJsonLd({
   name,
   description,
+  image,
   url,
   offers,
 }: ProductJsonLdInput) {
@@ -74,6 +75,7 @@ export function buildProductJsonLd({
     "@type": "Product",
     name,
     description,
+    ...(image ? { image } : {}),
     url,
     brand: {
       "@type": "Brand",
