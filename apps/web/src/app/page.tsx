@@ -79,14 +79,14 @@ export default function LandingPage() {
         <div className="relative z-10 mt-6 mb-16 flex w-full max-w-124.25 flex-col items-center justify-center gap-6 sm:mt-8 sm:mb-0 sm:gap-8 md:mt-10 md:gap-10 lg:mt-12 lg:gap-12">
           <div className="flex items-center justify-start gap-3 backdrop-blur-[0.515625rem] sm:gap-4">
             <TrackedSignupLink source="landing_page_hero_cta">
-              <Button className="corner-squircle h-10 overflow-hidden rounded-[2rem] border-transparent bg-primary px-6 py-2 shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] hover:bg-primary-hover supports-[corner-shape:round]:rounded-[1.25rem] sm:h-11 sm:px-8 sm:py-1.5 md:h-12 md:px-10 lg:px-12">
+              <Button className="corner-squircle h-10 overflow-hidden rounded-[1rem] border-transparent bg-primary px-6 py-2 shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] hover:bg-primary-hover supports-[corner-shape:round]:rounded-[1.25rem] sm:h-11 sm:px-8 sm:py-1.5 md:h-12 md:px-10 lg:px-12">
                 <span className="flex flex-col justify-center font-medium font-sans text-primary-foreground text-sm leading-5 sm:text-base md:text-[0.9375rem]">
                   Start for free
                 </span>
               </Button>
             </TrackedSignupLink>
             <Button
-              className="corner-squircle h-10 overflow-hidden rounded-[2rem] px-6 py-2 supports-[corner-shape:round]:rounded-[1.25rem] sm:h-11 sm:px-8 sm:py-1.5 md:h-12 md:px-10 lg:px-12"
+              className="corner-squircle h-10 overflow-hidden rounded-[1rem] px-6 py-2 supports-[corner-shape:round]:rounded-[1.25rem] sm:h-11 sm:px-8 sm:py-1.5 md:h-12 md:px-10 lg:px-12"
               nativeButton={false}
               render={<Link href="#how-it-works" />}
               variant="outline"

@@ -561,7 +561,7 @@ export function Navbar() {
                     Sign in
                   </Link>
                   <TrackedSignupLink
-                    className="corner-squircle overflow-hidden rounded-[2rem] border-transparent bg-primary px-4 py-1.5 font-medium text-primary-foreground text-sm shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] transition-[transform,background-color] duration-150 ease-out hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2 active:scale-95 supports-[corner-shape:round]:rounded-[1.25rem]"
+                    className="corner-squircle overflow-hidden rounded-[1rem] border-transparent bg-primary px-4 py-1.5 font-medium text-primary-foreground text-sm shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] transition-[transform,background-color] duration-150 ease-out hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2 active:scale-95 supports-[corner-shape:round]:rounded-[1.25rem]"
                     source="navbar_desktop_signup"
                   >
                     Sign up
@@ -662,7 +662,7 @@ function MobileNav({ onNavigate }: { onNavigate: () => void }) {
           Sign in
         </Link>
         <TrackedSignupLink
-          className="corner-squircle overflow-hidden rounded-[2rem] border-transparent bg-primary px-3 py-2 text-center font-medium text-primary-foreground text-sm shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] transition-[transform,background-color] duration-150 ease-out hover:bg-primary-hover active:scale-95 supports-[corner-shape:round]:rounded-[1.25rem]"
+          className="corner-squircle overflow-hidden rounded-[1rem] border-transparent bg-primary px-3 py-2 text-center font-medium text-primary-foreground text-sm shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] transition-[transform,background-color] duration-150 ease-out hover:bg-primary-hover active:scale-95 supports-[corner-shape:round]:rounded-[1.25rem]"
           onClick={onNavigate}
           source="navbar_mobile_signup"
         >
