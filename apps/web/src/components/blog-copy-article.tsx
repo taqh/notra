@@ -80,7 +80,7 @@ export function BlogCopyArticle({
   return (
     <div className="flex items-center gap-2 font-mono text-foreground/60 text-sm">
       <button
-        className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+        className="inline-flex cursor-pointer items-center gap-1.5 transition-colors hover:text-foreground"
         onClick={handleCopy}
         type="button"
       >
@@ -99,7 +99,7 @@ export function BlogCopyArticle({
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label="More article options"
-          className="inline-flex items-center transition-colors hover:text-foreground"
+          className="inline-flex cursor-pointer items-center transition-colors hover:text-foreground"
         >
           <HugeiconsIcon
             className="size-4"
